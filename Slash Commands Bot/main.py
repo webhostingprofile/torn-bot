@@ -1,4 +1,7 @@
 import bot
+import torn
 
 if __name__ == "__main__":
-    bot.run_bot()
+    torn.run_torn_commands()
+    #bot.run_bot()
+    
