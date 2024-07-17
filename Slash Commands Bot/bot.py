@@ -8,6 +8,9 @@ load_dotenv()
 intents = discord.Intents.default()
 intents.message_content = True
 TOKEN = os.getenv('discord_token')
+DISCORD_ID=os.getenv('DISCORD_ID')
+print("DISCORD_ID = ", DISCORD_ID)
+
 
 client = commands.Bot(command_prefix="!", intents=intents)
 
@@ -24,13 +27,12 @@ async def user(ctx):
     user_details = get_user_details()
     print("user details: {}".format(user_details))
     await ctx.send(user_details)
-
-# gets user stats with command !s
+    
+# Command to fetch user stats
 @client.command(name="s")
 async def s(ctx):
-    user_stats = get_user_stats()
+    user_stats = get_user_stats(discord_id=DISCORD_ID)
     await ctx.send(user_stats)
-
 # get user profile with command !p
 @client.command(name="p")
 async def p(ctx):

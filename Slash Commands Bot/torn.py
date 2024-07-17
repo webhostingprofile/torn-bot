@@ -2,10 +2,13 @@ from datetime import datetime
 import requests
 import os 
 from dotenv import load_dotenv
+from database import execute_query, fetch_query
 
 load_dotenv()
 TOKEN= os.getenv('torn_api_key')
+DISCORD_ID=os.getenv('DISCORD_ID')
 print("Torn token = ", TOKEN)
+print("DISCORD_ID = ", DISCORD_ID)
 
 def get_user_details():
     url = f'https://api.torn.com/user/?selections=profile&key={TOKEN}'
@@ -33,39 +36,80 @@ def get_user_details():
     except requests.exceptions.RequestException as e:
         return f"Error fetching data: {e}"
 
-def get_user_stats():
-    url=f'https://api.torn.com/user/?selections=battlestats&key={TOKEN}'
+def get_user_stats(discord_id):
+    url = f'https://api.torn.com/user/?selections=battlestats&key={TOKEN}'
 
     try:
         response = requests.get(url)
-        print("response", response)
         if response.status_code == 200:
             user_data = response.json()
-            print("user_data", user_data)
-            status = user_data.get('status', {})
-            battle_stats = user_data.get('strength', {}), user_data.get('speed', {}), user_data.get('defense', {}), user_data.get('dexterity', {})
-            total = sum(user_data.get(stat, 0) for stat in ['strength', 'speed', 'defense', 'dexterity'])
+            current_stats = {
+                'strength': user_data.get('strength', 0),
+                'speed': user_data.get('speed', 0),
+                'defense': user_data.get('defense', 0),
+                'dexterity': user_data.get('dexterity', 0)
+            }
+
+            # Calculate total of current stats
+            total = sum(current_stats.values())
+
+            # Fetch previous stats from the database
+            query = "SELECT strength, speed, defense, dexterity, total FROM user_stats WHERE discord_id = %s"
+            params = (discord_id,)
+            result = fetch_query(query, params)
+
+            if result:
+                previous_stats = {
+                    'strength': result[0],
+                    'speed': result[1],
+                    'defense': result[2],
+                    'dexterity': result[3],
+                    'total': result[4]
+                }
+
+                # Compare current stats with previous stats
+                comparison = (
+                    f"Comparison with last recorded stats:\n"
+                    f"Strength: {current_stats['strength'] - previous_stats['strength']:,}\n"
+                    f"Speed: {current_stats['speed'] - previous_stats['speed']:,}\n"
+                    f"Defense: {current_stats['defense'] - previous_stats['defense']:,}\n"
+                    f"Dexterity: {current_stats['dexterity'] - previous_stats['dexterity']:,}\n"
+                    f"Total: {total - previous_stats['total']:,}\n"
+                )
+            else:
+                comparison = "No previous stats found for comparison."
+
+            # Store the new stats in the database
+            query = """
+            INSERT INTO user_stats (discord_id, last_call, strength, speed, defense, dexterity, total)
+            VALUES (%s, current_timestamp, %s, %s, %s, %s, %s)
+            ON CONFLICT (discord_id) DO UPDATE
+            SET last_call = current_timestamp,
+                strength = EXCLUDED.strength,
+                speed = EXCLUDED.speed,
+                defense = EXCLUDED.defense,
+                dexterity = EXCLUDED.dexterity,
+                total = EXCLUDED.total
+            """
+            params = (discord_id, current_stats['strength'], current_stats['speed'], current_stats['defense'], current_stats['dexterity'], total)
+            execute_query(query, params)
+
+            # Return formatted stats and comparison
             user_details = (
                 f"Battle Stats:\n"
-                #f"Strength: {user_data['strength']}\n"
-                #f"Speed: {user_data['speed']}\n"
-                #f"Status: {status.get('description', 'Unknown')}\n"
-                #f"State: {status.get('state', 'Unknown')}\n"
-                #f"Color: {status.get('color', 'Unknown')}\n"
-                #f"Until: {status.get('until', 'Unknown')}\n"
-                f"Strength: {battle_stats[0]:,}\n"
-                f"Speed: {battle_stats[1]:,}\n"
-                f"Defense: {battle_stats[2]:,}\n"
-                f"Dexterity: {battle_stats[3]:,}\n"
+                f"Strength: {current_stats['strength']:,}\n"
+                f"Speed: {current_stats['speed']:,}\n"
+                f"Defense: {current_stats['defense']:,}\n"
+                f"Dexterity: {current_stats['dexterity']:,}\n"
                 f"Total: {total:,}\n"
+                f"\n{comparison}"
             )
-
             return user_details
-        else: 
+        else:
             return f"Error fetching data: {response.status_code}"
-        
     except requests.exceptions.RequestException as e:
         return f"Error fetching data: {e}"
+
     
 def get_user_profile():
     url=f'https://api.torn.com/user/?selections=profile&key={TOKEN}'
