@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import discord
 from discord.ext import commands
 from torn import get_user_details, get_user_stats, get_user_profile, get_vitals, get_eta
+from database import insert_user_discord_id, insert_user_torn_api_key, fetch_user_info
 
 load_dotenv()
 intents = discord.Intents.default()
@@ -21,6 +22,22 @@ async def on_ready():
 # @client.command(name='hello')
 # async def hello(ctx):
 #     await ctx.send("Hey there boyo!")
+
+@client.command(name='addid')
+async def addid(ctx, discord_id: str):
+    insert_user_discord_id(discord_id)
+    await ctx.send(f"Registered Discord ID: {discord_id}")
+
+@client.command(name='addapi')
+async def addapi(ctx, torn_api_key: str):
+    if isinstance(ctx.channel, discord.DMChannel): # Ensure the command is used in DMs
+        discord_id = str(ctx.author.id)
+        print("discord_id: {discord_id}")
+        print("ctx.author:", ctx.author)
+        insert_user_torn_api_key(torn_api_key)
+        await ctx.send(f"Registered Torn API Key: {torn_api_key}")
+    else:
+        await ctx.send("Please use this command in a direct message to the bot.")
 
 @client.command(name='user')
 async def user(ctx):

@@ -52,6 +52,37 @@ def test_insert_data():
     execute_query(query, params)
     print("Dummy data inserted successfully!")
 
+# User info functions
+def insert_user_discord_id(discord_id):
+    query = """
+    INSERT INTO user_info (discord_id)
+    VALUES (%s)
+    ON CONFLICT (discord_id) DO NOTHING
+    """
+    params = (discord_id,)
+    execute_query(query, params)
+    print(f"User info inserted for Discord ID: {discord_id}")
+
+def insert_user_torn_api_key(torn_api_key):
+    query = """
+            INSERT INTO user_torn_key (torn_api_key)
+            VALUES (%s)
+            ON CONFLICT (torn_api_key) DO NOTHING
+            """
+    params = (torn_api_key,)
+    execute_query(query, params)
+    print(f"User Torn API key inserted: {torn_api_key}")
+
+def fetch_user_info(discord_id):
+    query = "SELECT discord_id FROM user_info WHERE discord_id = %s"
+    params = (discord_id,)
+    result = fetch_query(query, params)
+    if result:
+        discord_id = result[0]
+        return discord_id
+    else:
+        return None
+
 # Example usage
 if __name__ == "__main__":
     connection = connect_to_db()
