@@ -68,13 +68,22 @@ def get_user_stats(discord_id):
                 }
 
                 # Compare current stats with previous stats
-                comparison = (
-                    f"Comparison with last recorded stats:\n"
+                change_in_stats = (
+                    f"Change since last recorded stats:\n"
                     f"Strength: {current_stats['strength'] - previous_stats['strength']:,}\n"
                     f"Speed: {current_stats['speed'] - previous_stats['speed']:,}\n"
                     f"Defense: {current_stats['defense'] - previous_stats['defense']:,}\n"
                     f"Dexterity: {current_stats['dexterity'] - previous_stats['dexterity']:,}\n"
                     f"Total: {total - previous_stats['total']:,}\n"
+                )
+                # Compare current stats with previous stats
+                comparison = (
+                    f"Comparison with last recorded stats:\n"
+                    f"Strength: {previous_stats['strength']:,} → {current_stats['strength']:,}\n"
+                    f"Speed: {previous_stats['speed']:,} → {current_stats['speed']:,}\n"
+                    f"Defense: {previous_stats['defense']:,} → {current_stats['defense']:,}\n"
+                    f"Dexterity: {previous_stats['dexterity']:,} → {current_stats['dexterity']:,}\n"
+                    f"Total: {total:,} → {previous_stats['total']:,}\n"
                 )
             else:
                 comparison = "No previous stats found for comparison."
@@ -102,7 +111,9 @@ def get_user_stats(discord_id):
                 f"Defense: {current_stats['defense']:,}\n"
                 f"Dexterity: {current_stats['dexterity']:,}\n"
                 f"Total: {total:,}\n"
+                f"\n{change_in_stats}\n"
                 f"\n{comparison}"
+                
             )
             return user_details
         else:
