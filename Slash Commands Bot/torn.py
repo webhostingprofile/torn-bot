@@ -37,13 +37,18 @@ def get_user_details():
     except requests.exceptions.RequestException as e:
         return f"Error fetching data: {e}"
 
+import requests
+from database import fetch_user_key, fetch_query, execute_query
+
 def get_user_stats(discord_id):
     discord_id=str(discord_id)
     print("discord_id", discord_id)
-    torn_api_key = fetch_user_key(discord_id)[1]
+
+    torn_api_key = fetch_user_key(discord_id)[1] # api key at index 1 from comment line below
     if not torn_api_key:
         return "Torn API key not found for the user"
     print("torn api key = ", torn_api_key)
+    #torn api key =  ('745436062322524160', 'yekdYV2PE5kItBBN', '2672120')
     url = f'https://api.torn.com/user/?selections=battlestats&key={torn_api_key}'
 
     try:
@@ -74,16 +79,26 @@ def get_user_stats(discord_id):
                     'total': result[4]
                 }
 
-                # Compare current stats with previous stats
-                change_in_stats = (
-                    f"Change since last recorded stats:\n"
-                    f"Strength: {current_stats['strength'] - previous_stats['strength']:,}\n"
-                    f"Speed: {current_stats['speed'] - previous_stats['speed']:,}\n"
-                    f"Defense: {current_stats['defense'] - previous_stats['defense']:,}\n"
-                    f"Dexterity: {current_stats['dexterity'] - previous_stats['dexterity']:,}\n"
-                    f"Total: {total - previous_stats['total']:,}\n"
-                )
-                # Compare current stats with previous stats
+                # Calculate change and percentage change
+                change_in_stats = ""
+                percentage_change = ""
+                for stat in ['strength', 'speed', 'defense', 'dexterity']:
+                    if previous_stats[stat] != 0:
+                        change = current_stats[stat] - previous_stats[stat]
+                        percent_change = ((current_stats[stat] - previous_stats[stat]) / previous_stats[stat]) * 100
+                    else:
+                        change = current_stats[stat]
+                        percent_change = 100 if current_stats[stat] > 0 else 0
+
+                    change_in_stats += f"{stat.capitalize()}: {change:,}\n"
+                    percentage_change += f"{stat.capitalize()}: {percent_change:.2f}%\n"
+
+                total_change = total - previous_stats['total']
+                total_percent_change = ((total - previous_stats['total']) / previous_stats['total']) * 100 if previous_stats['total'] != 0 else 100
+
+                change_in_stats += f"Total: {total_change:,}\n"
+                percentage_change += f"Total: {total_percent_change:.2f}%\n"
+
                 comparison = (
                     f"Comparison with last recorded stats:\n"
                     f"Strength: {previous_stats['strength']:,} → {current_stats['strength']:,}\n"
@@ -93,6 +108,8 @@ def get_user_stats(discord_id):
                     f"Total: {previous_stats['total']:,} → {total:,}\n"
                 )
             else:
+                change_in_stats = "No previous stats found for change calculation."
+                percentage_change = ""
                 comparison = "No previous stats found for comparison."
 
             # Store the new stats in the database
@@ -110,7 +127,7 @@ def get_user_stats(discord_id):
             params = (discord_id, current_stats['strength'], current_stats['speed'], current_stats['defense'], current_stats['dexterity'], total)
             execute_query(query, params)
 
-            # Return formatted stats and comparison
+            # Return formatted stats, change, percentage change, and comparison
             user_details = (
                 f"Battle Stats:\n"
                 f"Strength: {current_stats['strength']:,}\n"
@@ -118,15 +135,16 @@ def get_user_stats(discord_id):
                 f"Defense: {current_stats['defense']:,}\n"
                 f"Dexterity: {current_stats['dexterity']:,}\n"
                 f"Total: {total:,}\n"
-                f"\n{change_in_stats}"
+                f"\nChange in Stats:\n{change_in_stats}"
+                f"\nPercentage Change:\n{percentage_change}"
                 f"\n{comparison}"
-                
             )
             return user_details
         else:
             return f"Error fetching data: {response.status_code}"
     except requests.exceptions.RequestException as e:
         return f"Error fetching data: {e}"
+
 
     
 def get_user_profile():
