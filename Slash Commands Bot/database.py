@@ -25,61 +25,63 @@ def connect_to_db():
         return conn
     except psycopg2.Error as e:
         print(f"Error connecting to PostgreSQL database: {e}")
+        return None
 
 def execute_query(query, params=None):
     conn = connect_to_db()
-    cur = conn.cursor()
-    cur.execute(query, params)
-    conn.commit()
-    cur.close()
-    conn.close()
+    if conn is None:
+        return
+    try:
+        cur = conn.cursor()
+        cur.execute(query, params)
+        conn.commit()
+        cur.close()
+    except psycopg2.Error as e:
+        print(f"Error executing query: {e}")
+    finally:
+        conn.close()
 
 def fetch_query(query, params=None):
     conn = connect_to_db()
-    cur = conn.cursor()
-    cur.execute(query, params)
-    result = cur.fetchone()
-    cur.close()
-    conn.close()
-    return result
+    if conn is None:
+        return None
+    try:
+        cur = conn.cursor()
+        cur.execute(query, params)
+        result = cur.fetchone()
+        cur.close()
+        return result
+    except psycopg2.Error as e:
+        print(f"Error fetching query: {e}")
+        return None
+    finally:
+        conn.close()
+
+def insert_user_key(discord_id, torn_id, torn_api_key):
+    query = """
+    INSERT INTO user_keys (discord_id, torn_id, torn_api_key)
+    VALUES (%s, %s, %s)
+    """
+    params = (discord_id, torn_id, torn_api_key)
+    execute_query(query, params)
+    print(f"User key inserted/updated for torn ID: {torn_id}")
 
 def test_insert_data():
     query = """
-    INSERT INTO user_stats (discord_id, last_call, strength, speed, defense, dexterity, total)
+    INSERT INTO user_stats (torn_id, last_call, strength, speed, defense, dexterity, total)
     VALUES (%s, current_timestamp, %s, %s, %s, %s, %s)
     """
     params = ("discord_user_id", 100, 120, 80, 150, 450)  # Replace with actual data
     execute_query(query, params)
     print("Dummy data inserted successfully!")
 
-# User info functions
-def insert_user_discord_id(discord_id):
-    query = """
-    INSERT INTO user_info (discord_id)
-    VALUES (%s)
-    ON CONFLICT (discord_id) DO NOTHING
-    """
-    params = (discord_id,)
-    execute_query(query, params)
-    print(f"User info inserted for Discord ID: {discord_id}")
-
-def insert_user_torn_api_key(torn_api_key):
-    query = """
-            INSERT INTO user_torn_key (torn_api_key)
-            VALUES (%s)
-            ON CONFLICT (torn_api_key) DO NOTHING
-            """
-    params = (torn_api_key,)
-    execute_query(query, params)
-    print(f"User Torn API key inserted: {torn_api_key}")
-
-def fetch_user_info(discord_id):
-    query = "SELECT discord_id FROM user_info WHERE discord_id = %s"
+def fetch_user_key(discord_id):
+    query = "SELECT * FROM user_keys WHERE discord_id = %s"
     params = (discord_id,)
     result = fetch_query(query, params)
     if result:
         discord_id = result[0]
-        return discord_id
+        return result
     else:
         return None
 
@@ -87,8 +89,21 @@ def fetch_user_info(discord_id):
 if __name__ == "__main__":
     connection = connect_to_db()
     
+    # # Create table if not exists
+    # create_table_query = """
+    # CREATE TABLE IF NOT EXISTS user_keys (
+    #     torn_id BIGINT PRIMARY KEY,
+    #     torn_api_key VARCHAR(100) NOT NULL
+    # );
+    # """
+    # execute_query(create_table_query)
+
     # Test insert operation
-    test_insert_data()
+    insert_user_key('123456789', 'example_torn_api_key')
+
+    # Fetch user info to verify
+    # fetched_torn_id = fetch_user_info('123456789')
+    # print(f"Fetched Discord ID: {fetched_torn_id}")
 
     # Close the connection when done
     if connection:

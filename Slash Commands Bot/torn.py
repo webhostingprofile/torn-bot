@@ -2,7 +2,7 @@ from datetime import datetime
 import requests
 import os 
 from dotenv import load_dotenv
-from database import execute_query, fetch_query
+from database import execute_query, fetch_query, fetch_user_key
 
 load_dotenv()
 TOKEN= os.getenv('torn_api_key')
@@ -11,6 +11,7 @@ print("Torn token = ", TOKEN)
 print("DISCORD_ID = ", DISCORD_ID)
 
 def get_user_details():
+
     url = f'https://api.torn.com/user/?selections=profile&key={TOKEN}'
     
     try:
@@ -37,7 +38,13 @@ def get_user_details():
         return f"Error fetching data: {e}"
 
 def get_user_stats(discord_id):
-    url = f'https://api.torn.com/user/?selections=battlestats&key={TOKEN}'
+    discord_id=str(discord_id)
+    print("discord_id", discord_id)
+    torn_api_key = fetch_user_key(discord_id)[1]
+    if not torn_api_key:
+        return "Torn API key not found for the user"
+    print("torn api key = ", torn_api_key)
+    url = f'https://api.torn.com/user/?selections=battlestats&key={torn_api_key}'
 
     try:
         response = requests.get(url)
@@ -83,7 +90,7 @@ def get_user_stats(discord_id):
                     f"Speed: {previous_stats['speed']:,} → {current_stats['speed']:,}\n"
                     f"Defense: {previous_stats['defense']:,} → {current_stats['defense']:,}\n"
                     f"Dexterity: {previous_stats['dexterity']:,} → {current_stats['dexterity']:,}\n"
-                    f"Total: {total:,} → {previous_stats['total']:,}\n"
+                    f"Total: {previous_stats['total']:,} → {total:,}\n"
                 )
             else:
                 comparison = "No previous stats found for comparison."
@@ -111,7 +118,7 @@ def get_user_stats(discord_id):
                 f"Defense: {current_stats['defense']:,}\n"
                 f"Dexterity: {current_stats['dexterity']:,}\n"
                 f"Total: {total:,}\n"
-                f"\n{change_in_stats}\n"
+                f"\n{change_in_stats}"
                 f"\n{comparison}"
                 
             )
