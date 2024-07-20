@@ -43,7 +43,7 @@ from database import fetch_user_key, fetch_query, execute_query
 def get_user_stats(discord_id):
     discord_id=str(discord_id)
     print("discord_id", discord_id)
-
+    print("user keys fetched", fetch_user_key(discord_id))
     torn_api_key = fetch_user_key(discord_id)[1] # api key at index 1 from comment line below
     if not torn_api_key:
         return "Torn API key not found for the user"
