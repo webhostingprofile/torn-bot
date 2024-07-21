@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 import firebase_admin
 from firebase_admin import credentials, firestore
+from database import get_firestore_db
 
 load_dotenv()
 TOKEN = os.getenv('torn_api_key')
@@ -30,7 +31,6 @@ print("DISCORD_ID = ", DISCORD_ID)
 # cred = credentials.Certificate(firebase_credentials)
 # firebase_admin.initialize_app(cred)
 
-db = firestore.client()
 
 def get_user_details():
     url = f'https://api.torn.com/user/?selections=profile&key={TOKEN}'
@@ -58,6 +58,8 @@ def get_user_details():
 def get_user_stats(discord_id):
     discord_id = str(discord_id)
     print("discord_id", discord_id)
+
+    db = get_firestore_db() # Use the firestore client from database.py
 
     # Fetching Torn API key from Firestore
     user_doc = db.collection('users').document(discord_id).get()

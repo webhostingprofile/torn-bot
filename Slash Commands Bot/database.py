@@ -31,6 +31,9 @@ firebase_admin.initialize_app(cred)
 # Initialize Firestore DB
 db = firestore.client()
 
+def get_firestore_db():
+    return db
+
 def insert_user_key(discord_id, torn_id, torn_api_key):
     doc_ref = db.collection('user_keys').document(discord_id)
     doc_ref.set({
