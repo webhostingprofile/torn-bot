@@ -62,7 +62,8 @@ def get_user_stats(discord_id):
     db = get_firestore_db() # Use the firestore client from database.py
 
     # Fetching Torn API key from Firestore
-    user_doc = db.collection('users').document(discord_id).get()
+    user_doc = db.collection('user_keys').document(discord_id).get()
+    print("user_doc", user_doc)
     if user_doc.exists:
         torn_api_key = user_doc.to_dict().get('torn_api_key')
     else:
