@@ -80,9 +80,10 @@ def run_flask():
 # Run Flask server in a separate thread
 if __name__ == "__main__":
     # Start the Flask server in a background thread
-    torn.run_torn_commands()
-    threading.Thread(target=run_flask).start()
+    #torn.run_torn_commands()
 
     # Start the Discord bot
     client.run(TOKEN)
+    threading.Thread(target=run_flask).start()
+
 
