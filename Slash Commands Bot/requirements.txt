@@ -6,3 +6,5 @@ env==0.1.0
 requests==2.31.0
 firebase==4.0.1
 firebase-admin==6.5.0
+Flask==3.0.0
+Flask-Cors==4.0.0

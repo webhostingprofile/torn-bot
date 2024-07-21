@@ -2,15 +2,25 @@ import os
 from dotenv import load_dotenv
 import discord
 from discord.ext import commands
+from flask import Flask
+import threading
 from torn import get_user_details, get_user_stats, get_user_profile, get_vitals, get_eta
 from database import insert_user_key
 
+# Load environment variables
 load_dotenv()
+
+# Initialize Flask app
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return "Discord bot is running!"
+
+# Initialize Discord bot
 intents = discord.Intents.default()
 intents.message_content = True
 TOKEN = os.getenv('discord_token')
-#DISCORD_ID=os.getenv('DISCORD_ID')
-# print("DISCORD_ID = ", DISCORD_ID)
 
 client = commands.Bot(command_prefix="!", intents=intents)
 
@@ -36,13 +46,11 @@ async def user(ctx):
     print("user details: {}".format(user_details))
     await ctx.send(user_details)
 
-# Command to fetch user stats
 @client.command(name="s")
 async def s(ctx):
     user_stats = get_user_stats(discord_id=ctx.author.id)
     await ctx.send(user_stats)
 
-# Get user profile with command !p
 @client.command(name="p")
 async def p(ctx):
     user_profile = get_user_profile()
@@ -63,4 +71,13 @@ async def sync(ctx: commands.Context):
     await ctx.send("Syncing...")
     await client.tree.sync()
 
-client.run(TOKEN)
+# Function to run Flask server
+def run_flask():
+    app.run(host='0.0.0.0', port=8080)
+
+# Run Flask server in a separate thread
+if __name__ == "__main__":
+    # Start the Flask server in a background thread
+    threading.Thread(target=run_flask).start()
+    # Start the Discord bot
+    client.run(TOKEN)
