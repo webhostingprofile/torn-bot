@@ -1,25 +1,32 @@
 from datetime import datetime
 import requests
-import os 
+import os
 from dotenv import load_dotenv
-from database import execute_query, fetch_query, fetch_user_key
+import firebase_admin
+from firebase_admin import credentials, firestore
 
 load_dotenv()
-TOKEN= os.getenv('torn_api_key')
-DISCORD_ID=os.getenv('DISCORD_ID')
+TOKEN = os.getenv('torn_api_key')
+DISCORD_ID = os.getenv('DISCORD_ID')
 print("Torn token = ", TOKEN)
 print("DISCORD_ID = ", DISCORD_ID)
 
-def get_user_details():
+SERVICE_ACCOUNT_KEY = os.getenv('SERVICE_ACCOUNT_KEY')
 
+# Initialize the Firebase Admin SDK
+cred = credentials.Certificate(SERVICE_ACCOUNT_KEY)
+firebase_admin.initialize_app(cred)
+
+# Initialize Firestore DB
+db = firestore.client()
+
+def get_user_details():
     url = f'https://api.torn.com/user/?selections=profile&key={TOKEN}'
-    
     try:
         response = requests.get(url)
-        
         if response.status_code == 200:
             user_data = response.json()
-            print("user data from user details = ", user_data);
+            print("user data from user details = ", user_data)
             status = user_data.get('status', {})
             user_details = (
                 f"User Details:\n"
@@ -33,22 +40,21 @@ def get_user_details():
             return user_details
         else:
             return f"Error fetching data: {response.status_code}"
-    
     except requests.exceptions.RequestException as e:
         return f"Error fetching data: {e}"
 
-import requests
-from database import fetch_user_key, fetch_query, execute_query
-
 def get_user_stats(discord_id):
-    discord_id=str(discord_id)
+    discord_id = str(discord_id)
     print("discord_id", discord_id)
-    print("user keys fetched", fetch_user_key(discord_id))
-    torn_api_key = fetch_user_key(discord_id)[1] # api key at index 1 from comment line below
-    if not torn_api_key:
+
+    # Fetching Torn API key from Firestore
+    user_doc = db.collection('users').document(discord_id).get()
+    if user_doc.exists:
+        torn_api_key = user_doc.to_dict().get('torn_api_key')
+    else:
         return "Torn API key not found for the user"
+
     print("torn api key = ", torn_api_key)
-    #torn api key =  ('745436062322524160', 'yekdYV2PE5kItBBN', '2672120')
     url = f'https://api.torn.com/user/?selections=battlestats&key={torn_api_key}'
 
     try:
@@ -65,19 +71,11 @@ def get_user_stats(discord_id):
             # Calculate total of current stats
             total = sum(current_stats.values())
 
-            # Fetch previous stats from the database
-            query = "SELECT strength, speed, defense, dexterity, total FROM user_stats WHERE discord_id = %s"
-            params = (discord_id,)
-            result = fetch_query(query, params)
-
-            if result:
-                previous_stats = {
-                    'strength': result[0],
-                    'speed': result[1],
-                    'defense': result[2],
-                    'dexterity': result[3],
-                    'total': result[4]
-                }
+            # Fetch previous stats from Firestore
+            stats_doc = db.collection('user_stats').document(discord_id).get()
+            if stats_doc.exists:
+                previous_stats = stats_doc.to_dict()
+                previous_stats['total'] = previous_stats.get('total', 0)
 
                 # Calculate change and percentage change
                 change_in_stats = ""
@@ -112,20 +110,15 @@ def get_user_stats(discord_id):
                 percentage_change = ""
                 comparison = "No previous stats found for comparison."
 
-            # Store the new stats in the database
-            query = """
-            INSERT INTO user_stats (discord_id, last_call, strength, speed, defense, dexterity, total)
-            VALUES (%s, current_timestamp, %s, %s, %s, %s, %s)
-            ON CONFLICT (discord_id) DO UPDATE
-            SET last_call = current_timestamp,
-                strength = EXCLUDED.strength,
-                speed = EXCLUDED.speed,
-                defense = EXCLUDED.defense,
-                dexterity = EXCLUDED.dexterity,
-                total = EXCLUDED.total
-            """
-            params = (discord_id, current_stats['strength'], current_stats['speed'], current_stats['defense'], current_stats['dexterity'], total)
-            execute_query(query, params)
+            # Store the new stats in Firestore
+            db.collection('user_stats').document(discord_id).set({
+                'last_call': datetime.now(),
+                'strength': current_stats['strength'],
+                'speed': current_stats['speed'],
+                'defense': current_stats['defense'],
+                'dexterity': current_stats['dexterity'],
+                'total': total
+            }, merge=True)
 
             # Return formatted stats, change, percentage change, and comparison
             user_details = (
@@ -145,10 +138,8 @@ def get_user_stats(discord_id):
     except requests.exceptions.RequestException as e:
         return f"Error fetching data: {e}"
 
-
-    
 def get_user_profile():
-    url=f'https://api.torn.com/user/?selections=profile&key={TOKEN}'
+    url = f'https://api.torn.com/user/?selections=profile&key={TOKEN}'
 
     try:
         response = requests.get(url)
@@ -161,8 +152,6 @@ def get_user_profile():
             return f"Error fetching data: {response.status_code}"
     except requests.exceptions.RequestException as e:
         return f"Error fetching data: {e}"
-    
-
 
 def format_torn_profile(data):
     # Extracting and formatting the necessary details
@@ -173,7 +162,7 @@ def format_torn_profile(data):
         'level': data['level'],
         'rank': data['rank'],
         'age': f"{data['age'] // 365} years {data['age'] % 365 // 30} months {data['age'] % 30} days old",
-        'last_online': datetime.datetime.fromtimestamp(data['last_action']['timestamp']).strftime('%Y-%m-%d %H:%M:%S'),
+        'last_online': datetime.fromtimestamp(data['last_action']['timestamp']).strftime('%Y-%m-%d %H:%M:%S'),
         'life': f"{data['life']['current']}/{data['life']['maximum']}",
         'status': data['status']['description'],
         'employment': f"{data['job']['position']} at {data['job']['company_name']}",
@@ -226,7 +215,7 @@ def format_torn_profile(data):
     return formatted_profile
 
 def get_vitals():
-    url=f'https://api.torn.com/user/?selections=profile,properties,personalstats,cooldowns,bars,education&key={TOKEN}'
+    url = f'https://api.torn.com/user/?selections=profile,properties,personalstats,cooldowns,bars,education&key={TOKEN}'
 
     try:
         response = requests.get(url)
@@ -251,7 +240,7 @@ def format_vitals(data):
         'medical_cooldown': data['cooldowns']['medical'],
         'drug_cooldown': data['cooldowns']['drug'],
         'booster_cooldown': data['cooldowns']['booster'],
-        'education_cooldown': data['education_timeleft'] #data['cooldowns']['education'],
+        'education_cooldown': data['education_timeleft'] # data['cooldowns']['education'],
     }
 
     # Converting seconds to readable format
@@ -294,7 +283,6 @@ def format_vitals(data):
     """
     return formatted_vitals
 
-
 def get_eta():
     url = f'https://api.torn.com/user/?selections=travel&key={TOKEN}'
 
@@ -310,15 +298,7 @@ def get_eta():
                 print("date time current = ", datetime.now())
                 time = datetime.now()
                 current_time = time.strftime('%H:%M:%S')
-                print("current_time = ", current_time)
-                ##arrival_time = current_time + datetime.timedelta(seconds=time_left)
-
-                #formatted_current_time = current_time.strftime("%H:%M")
-                # = arrival_time.strftime("%H:%M")
-                
                 formatted_time_left = format_time_left(time_left)
-                # need to add link in to take their profile 
-                # also need to check if they are arrived then to show landed in destination
                 output = f"✈️ Traveling to {destination}\nEstimate Arrival\n{current_time} ({formatted_time_left})"
                 return output
             else:
@@ -327,7 +307,7 @@ def get_eta():
             return f"Error fetching data: {response.status_code}"
     except requests.exceptions.RequestException as e:
         return f"Error fetching data: {e}"
-    
+
 def format_time_left(seconds):
     days, seconds = divmod(seconds, 86400)  # 86400 seconds in a day
     hours, seconds = divmod(seconds, 3600)  # 3600 seconds in an hour
