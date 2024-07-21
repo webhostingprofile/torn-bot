@@ -22,7 +22,10 @@ async def on_ready():
 async def addkeys(ctx, torn_id: str, torn_api_key: str):
     if isinstance(ctx.channel, discord.DMChannel):  # Ensure the command is used in DMs
         print("discord id = ", ctx.author.id)
-        insert_user_key(ctx.author.id, torn_id, torn_api_key)
+        string_ctx_author_id = str(ctx.author.id)
+        string_torn_id = str(torn_id)
+        string_torn_api_key = str(torn_api_key)
+        insert_user_key(string_ctx_author_id, string_torn_id, string_torn_api_key)
         await ctx.send(f"Registered torn ID: {torn_id} and Torn API Key: {torn_api_key}")
     else:
         await ctx.send("Please use this command in a direct message to the bot.")
