@@ -30,6 +30,8 @@ print("DISCORD_ID = ", DISCORD_ID)
 # cred = credentials.Certificate(firebase_credentials)
 # firebase_admin.initialize_app(cred)
 
+db = firestore.client()
+
 def get_user_details():
     url = f'https://api.torn.com/user/?selections=profile&key={TOKEN}'
     try:
