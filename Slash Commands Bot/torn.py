@@ -55,6 +55,8 @@ def get_user_details():
     except requests.exceptions.RequestException as e:
         return f"Error fetching data: {e}"
 
+from datetime import datetime
+
 def get_user_stats(discord_id):
     discord_id = str(discord_id)
     print("discord_id", discord_id)
@@ -127,13 +129,16 @@ def get_user_stats(discord_id):
 
             # Store the new stats in Firestore
             db.collection('user_stats').document(discord_id).set({
-                'last_call': datetime.now(),
+                'last_call': datetime.now(),  # Store current timestamp
                 'strength': current_stats['strength'],
                 'speed': current_stats['speed'],
                 'defense': current_stats['defense'],
                 'dexterity': current_stats['dexterity'],
                 'total': total
             }, merge=True)
+
+            # Format last_call timestamp for display
+            last_call_timestamp = stats_doc.get('last_call').strftime('%d %B %Y at %H:%M:%S')
 
             # Return formatted stats, change, percentage change, and comparison
             user_details = (
@@ -146,12 +151,14 @@ def get_user_stats(discord_id):
                 f"\nChange in Stats:\n{change_in_stats}"
                 f"\nPercentage Change:\n{percentage_change}"
                 f"\n{comparison}"
+                f"\nChanges Since: {last_call_timestamp}"  # Display formatted timestamp
             )
             return user_details
         else:
             return f"Error fetching data: {response.status_code}"
     except requests.exceptions.RequestException as e:
         return f"Error fetching data: {e}"
+
 
 def get_user_profile():
     url = f'https://api.torn.com/user/?selections=profile&key={TOKEN}'
