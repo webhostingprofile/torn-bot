@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import firebase_admin
 from firebase_admin import credentials, firestore
 from database import get_firestore_db
+import pytz
 
 load_dotenv()
 TOKEN = os.getenv('torn_api_key')
@@ -63,13 +64,23 @@ def get_user_stats(discord_id):
 
     db = get_firestore_db() # Use the firestore client from database.py
 
-    # Fetching Torn API key from Firestore
+    # Fetching Torn API key and user time zone from Firestore
     user_doc = db.collection('user_keys').document(discord_id).get()
     print("user_doc", user_doc)
     if user_doc.exists:
-        torn_api_key = user_doc.to_dict().get('torn_api_key')
+        user_data = user_doc.to_dict()
+        torn_api_key = user_data.get('torn_api_key')
+        user_timezone_str = user_data.get('time_zone')  # Assuming time zone is stored
     else:
         return "Torn API key not found for the user"
+
+    if not torn_api_key:
+        return "Torn API key not found for the user"
+    
+    if not user_timezone_str:
+        return "User time zone not found. Please set your time zone."
+
+    user_timezone = pytz.timezone(user_timezone_str)
 
     print("torn api key = ", torn_api_key)
     url = f'https://api.torn.com/user/?selections=battlestats&key={torn_api_key}'
@@ -129,7 +140,7 @@ def get_user_stats(discord_id):
 
             # Store the new stats in Firestore
             db.collection('user_stats').document(discord_id).set({
-                'last_call': datetime.now(),  # Store current timestamp
+                'last_call': datetime.utcnow(),  # Store current UTC timestamp
                 'strength': current_stats['strength'],
                 'speed': current_stats['speed'],
                 'defense': current_stats['defense'],
@@ -138,7 +149,16 @@ def get_user_stats(discord_id):
             }, merge=True)
 
             # Format last_call timestamp for display
-            last_call_timestamp = stats_doc.get('last_call').strftime('%d %B %Y at %H:%M:%S')
+            if stats_doc.exists:
+                last_call_timestamp = stats_doc.to_dict().get('last_call')
+                if last_call_timestamp:
+                    # Convert UTC timestamp to user's local time zone
+                    last_call_timestamp = last_call_timestamp.astimezone(user_timezone)
+                    formatted_last_call = last_call_timestamp.strftime('%d %B %Y at %H:%M:%S')
+                else:
+                    formatted_last_call = "N/A"
+            else:
+                formatted_last_call = "N/A"
 
             # Return formatted stats, change, percentage change, and comparison
             user_details = (
@@ -151,7 +171,7 @@ def get_user_stats(discord_id):
                 f"\nChange in Stats:\n{change_in_stats}"
                 f"\nPercentage Change:\n{percentage_change}"
                 f"\n{comparison}"
-                f"\nChanges Since: {last_call_timestamp}"  # Display formatted timestamp
+                f"\nLast Call: {formatted_last_call}"  # Display formatted timestamp
             )
             return user_details
         else:
