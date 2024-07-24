@@ -3,7 +3,7 @@ from discord.ui import Select, View, Button
 from database import get_firestore_db
 
 # Define all UTC offsets
-UTC_OFFSETS = [f"UTC{n:+}" for n in range(-12, 15)]
+UTC_OFFSETS = [f"TCT{n:+}" for n in range(-12, 15)]
 ITEMS_PER_PAGE = 25
 
 def get_paginated_options(page):

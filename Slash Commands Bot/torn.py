@@ -61,29 +61,25 @@ def get_user_stats(discord_id):
     discord_id = str(discord_id)
     print("discord_id", discord_id)
 
-    db = get_firestore_db() # Use the firestore client from database.py
+    db = get_firestore_db()  # Use the Firestore client from your database setup
 
-    # Fetching Torn API key and user time zone from Firestore
+    # Fetch Torn API key and user timezone from Firestore
     user_doc = db.collection('user_keys').document(discord_id).get()
-    print("user_doc", user_doc)
     if user_doc.exists:
         user_data = user_doc.to_dict()
         torn_api_key = user_data.get('torn_api_key')
-        user_timezone_str = user_data.get('time_zone')  # Assuming time zone is stored
+        user_timezone_str = user_data.get('time_zone')  # Assuming timezone is stored
     else:
-        return "Torn API key not found for the user"
+        return "User data not found."
 
     if not torn_api_key:
-        return "Torn API key not found for the user"
+        return "Torn API key not found for the user."
     
     if not user_timezone_str:
-        return "User time zone not found. Please set your time zone."
+        return "User timezone not set. Please set your timezone using !timezone command."
 
-    user_timezone = pytz.timezone(user_timezone_str)
-
-    print("torn api key = ", torn_api_key)
+    # Fetch user stats from Torn API
     url = f'https://api.torn.com/user/?selections=battlestats&key={torn_api_key}'
-
     try:
         response = requests.get(url)
         if response.status_code == 200:
@@ -95,7 +91,6 @@ def get_user_stats(discord_id):
                 'dexterity': user_data.get('dexterity', 0)
             }
 
-            # Calculate total of current stats
             total = sum(current_stats.values())
 
             # Fetch previous stats from Firestore
@@ -104,22 +99,17 @@ def get_user_stats(discord_id):
                 previous_stats = stats_doc.to_dict()
                 previous_stats['total'] = previous_stats.get('total', 0)
 
-                # Calculate change and percentage change
                 change_in_stats = ""
                 percentage_change = ""
                 for stat in ['strength', 'speed', 'defense', 'dexterity']:
-                    if previous_stats[stat] != 0:
-                        change = current_stats[stat] - previous_stats[stat]
-                        percent_change = ((current_stats[stat] - previous_stats[stat]) / previous_stats[stat]) * 100
-                    else:
-                        change = current_stats[stat]
-                        percent_change = 100 if current_stats[stat] > 0 else 0
+                    change = current_stats[stat] - previous_stats.get(stat, 0)
+                    percent_change = ((change / previous_stats[stat]) * 100) if previous_stats[stat] != 0 else 0
 
                     change_in_stats += f"{stat.capitalize()}: {change:,}\n"
                     percentage_change += f"{stat.capitalize()}: {percent_change:.2f}%\n"
 
                 total_change = total - previous_stats['total']
-                total_percent_change = ((total - previous_stats['total']) / previous_stats['total']) * 100 if previous_stats['total'] != 0 else 100
+                total_percent_change = ((total_change / previous_stats['total']) * 100) if previous_stats['total'] != 0 else 0
 
                 change_in_stats += f"Total: {total_change:,}\n"
                 percentage_change += f"Total: {total_percent_change:.2f}%\n"
@@ -139,7 +129,7 @@ def get_user_stats(discord_id):
 
             # Store the new stats in Firestore
             db.collection('user_stats').document(discord_id).set({
-                'last_call': datetime.utcnow(),  # Store current UTC timestamp
+                'last_call': datetime.utcnow(),
                 'strength': current_stats['strength'],
                 'speed': current_stats['speed'],
                 'defense': current_stats['defense'],
@@ -147,15 +137,12 @@ def get_user_stats(discord_id):
                 'total': total
             }, merge=True)
 
-            # Format last_call timestamp for display
-            if stats_doc.exists:
-                last_call_timestamp = stats_doc.to_dict().get('last_call')
-                if last_call_timestamp:
-                    # Convert UTC timestamp to user's local time zone
-                    last_call_timestamp = last_call_timestamp.astimezone(user_timezone)
-                    formatted_last_call = last_call_timestamp.strftime('%d %B %Y at %H:%M:%S')
-                else:
-                    formatted_last_call = "N/A"
+            # Format the last_call timestamp for display
+            if stats_doc.exists and 'last_call' in previous_stats:
+                last_call_timestamp = previous_stats['last_call']
+                user_timezone = pytz.timezone(user_timezone_str)
+                last_call_local = last_call_timestamp.astimezone(user_timezone)
+                formatted_last_call = last_call_local.strftime('%d %B %Y at %H:%M:%S')
             else:
                 formatted_last_call = "N/A"
 
