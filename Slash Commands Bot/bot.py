@@ -44,7 +44,7 @@ async def on_ready():
 async def change_status():
     await client.change_presence(activity=discord.Game(next(status)))
 
-@client.command()
+@client.command(name="timezone")
 async def timezone(ctx):
     """Command to set the user's time zone using UTC offsets."""
     select = Select(
