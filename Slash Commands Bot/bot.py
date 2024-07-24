@@ -15,7 +15,7 @@ import pytz
 from timezone import TimezoneView
 
 # Define a list of UTC offsets from -12 to +14
-UTC_OFFSETS = [f"UTC{n:+}" for n in range(-12, 15)]
+UTC_OFFSETS = [f"TCT{n:+}" for n in range(-12, 15)]
 
 # pagination constants
 ITEMS_PER_PAGE = 25
@@ -51,7 +51,7 @@ async def change_status():
 @client.command(name="timezone")
 async def timezone(ctx):
     view = TimezoneView(current_page=0)
-    view.message = await ctx.send("Please select your UTC offset:", view=view)
+    view.message = await ctx.send("Please select your TCT offset:", view=view)
 
 @client.command(name='addkeys')
 async def addkeys(ctx, torn_id: str, torn_api_key: str):

@@ -22,7 +22,7 @@ class TimezoneView(View):
         self.clear_items()
         options = get_paginated_options(self.current_page)
         select = Select(
-            placeholder="Choose your UTC offset...",
+            placeholder="Choose your TCT offset...",
             options=[discord.SelectOption(label=tz, value=tz) for tz in options]
         )
         select.callback = self.select_callback
@@ -39,9 +39,10 @@ class TimezoneView(View):
         discord_id = str(interaction.user.id)
         db = get_firestore_db()  # Define this function as per your database setup
 
+        converted_to_utc_TZ = convert_tct_to_utc_offset(selected_tz)
         # Store the selected UTC offset in Firestore
         db.collection('user_keys').document(discord_id).set({
-            'time_zone': selected_tz
+            'time_zone': convert_tct_to_utc_offset
         }, merge=True)
 
         await interaction.response.send_message(f"Time zone set to {selected_tz}", ephemeral=True)
@@ -59,3 +60,14 @@ class TimezoneView(View):
             self.current_page += 1
             self.update_select_options()
             await interaction.response.edit_message(view=self)
+
+
+# Function to convert TCT offset to UTC offset
+def convert_tct_to_utc_offset(tct_str):
+    if tct_str.startswith("TCT"):
+        offset_str = tct_str[3:]  # Get the part after "TCT"
+        if offset_str == "0":
+            return "UTC+0"
+        else:
+            return "UTC" + offset_str
+    return "UTC+0"  # Default to UTC+0 if something goes wrong
