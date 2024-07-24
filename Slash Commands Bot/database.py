@@ -39,7 +39,8 @@ def insert_user_key(discord_id, torn_id, torn_api_key):
     doc_ref.set({
         'discord_id': discord_id,
         'torn_id': torn_id,
-        'torn_api_key': torn_api_key
+        'torn_api_key': torn_api_key,
+        'timezone': "",
     })
     print(f"User key inserted/updated for torn ID: {torn_id}")
 

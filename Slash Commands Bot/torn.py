@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import requests
 import os
 from dotenv import load_dotenv
@@ -56,7 +56,6 @@ def get_user_details():
     except requests.exceptions.RequestException as e:
         return f"Error fetching data: {e}"
 
-from datetime import datetime
 
 def get_user_stats(discord_id):
     discord_id = str(discord_id)
