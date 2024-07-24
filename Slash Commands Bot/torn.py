@@ -141,8 +141,8 @@ def get_user_stats(discord_id):
             if stats_doc.exists and 'last_call' in previous_stats:
                 last_call_timestamp = previous_stats['last_call']
                 #user_timezone = pytz.timezone(user_timezone_str)
-                last_call_local = last_call_timestamp.astimezone(user_timezone_str)
-                formatted_last_call = last_call_local.strftime('%d %B %Y at %H:%M:%S')
+                #last_call_local = last_call_timestamp.astimezone(user_timezone_str)
+                formatted_last_call = last_call_timestamp.strftime('%d %B %Y at %H:%M:%S')
             else:
                 formatted_last_call = "N/A"
 
