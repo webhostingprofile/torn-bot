@@ -15,6 +15,7 @@ class TimezoneView(View):
     def __init__(self, current_page=0):
         super().__init__(timeout=60)
         self.current_page = current_page
+        self.message = None  # To store the reference to the message with the interactive component
         self.update_select_options()
 
     def update_select_options(self):
@@ -26,10 +27,12 @@ class TimezoneView(View):
         )
         select.callback = self.select_callback
         self.add_item(select)
+
+        # Add pagination buttons if needed
         if self.current_page > 0:
-            self.add_item(Button(label='Previous', style=discord.ButtonStyle.secondary, custom_id='previous'))
+            self.add_item(Button(label='Previous', style=discord.ButtonStyle.secondary))
         if (self.current_page + 1) * ITEMS_PER_PAGE < len(UTC_OFFSETS):
-            self.add_item(Button(label='Next', style=discord.ButtonStyle.secondary, custom_id='next'))
+            self.add_item(Button(label='Next', style=discord.ButtonStyle.secondary))
 
     async def select_callback(self, interaction):
         selected_tz = interaction.data['values'][0]
@@ -43,17 +46,16 @@ class TimezoneView(View):
 
         await interaction.response.send_message(f"Time zone set to {selected_tz}", ephemeral=True)
 
-    async def interaction_check(self, interaction) -> bool:
-        return interaction.user == self.message.author
-
     @discord.ui.button(label="Previous", style=discord.ButtonStyle.secondary)
     async def previous(self, button, interaction):
-        self.current_page -= 1
-        self.update_select_options()
-        await interaction.response.edit_message(view=self)
+        if self.current_page > 0:
+            self.current_page -= 1
+            self.update_select_options()
+            await interaction.response.edit_message(view=self)
 
     @discord.ui.button(label="Next", style=discord.ButtonStyle.secondary)
     async def next(self, button, interaction):
-        self.current_page += 1
-        self.update_select_options()
-        await interaction.response.edit_message(view=self)
+        if (self.current_page + 1) * ITEMS_PER_PAGE < len(UTC_OFFSETS):
+            self.current_page += 1
+            self.update_select_options()
+            await interaction.response.edit_message(view=self)
