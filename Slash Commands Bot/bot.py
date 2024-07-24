@@ -12,9 +12,13 @@ from torn import get_user_details, get_user_stats, get_user_profile, get_vitals,
 from database import insert_user_key, get_firestore_db
 import bot
 import pytz
+from timezone import TimezoneView
 
 # Define a list of UTC offsets from -12 to +14
 UTC_OFFSETS = [f"UTC{n:+}" for n in range(-12, 15)]
+
+# pagination constants
+ITEMS_PER_PAGE = 25
 
 
 status = cycle(['with Python','JetHub'])
@@ -46,30 +50,8 @@ async def change_status():
 
 @client.command(name="timezone")
 async def timezone(ctx):
-    """Command to set the user's time zone using UTC offsets."""
-    select = Select(
-        placeholder="Choose your UTC offset...",
-        options=[discord.SelectOption(label=tz, value=tz) for tz in UTC_OFFSETS]
-    )
-
-    async def select_callback(interaction):
-        selected_tz = select.values[0]
-        discord_id = str(ctx.author.id)
-        db = get_firestore_db()
-
-        # Store the selected UTC offset in Firestore
-        db.collection('user_keys').document(discord_id).set({
-            'time_zone': selected_tz
-        }, merge=True)
-
-        await interaction.response.send_message(f"Time zone set to {selected_tz}", ephemeral=True)
-    
-    select.callback = select_callback
-
-    view = View()
-    view.add_item(select)
-    
-    await ctx.send("Please select your UTC offset:", view=view)
+    view = TimezoneView(current_page=0)
+    view.message = await ctx.send("Please select your UTC offset:", view=view)
 
 @client.command(name='addkeys')
 async def addkeys(ctx, torn_id: str, torn_api_key: str):
