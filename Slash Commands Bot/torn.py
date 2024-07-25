@@ -186,21 +186,28 @@ def get_user_stat_history(discord_id, days_ago):
     # Calculate the timezone for days_ago 
     target_date = datetime.utcnow() - timedelta(days=days_ago)
     unix_timestamp = int(target_date.timestamp())
-
+    print("timestamp = ", unix_timestamp)
     url = f'https://api.torn.com/user/?key={torn_api_key}&timestamp={unix_timestamp}&stat=strength,defense,speed,dexterity,totalstats&comment=TornAPI&selections=personalstats'
     #url = f'https://api.torn.com/user/?selections=battlestats&timestamp={unix_timestamp}&key={torn_api_key}'
     try:
         response = requests.get(url)
         if response.status_code == 200:
             user_data = response.json()
-            print("user data = ", user_data)
+            print("User data =", user_data)
+            
+            # Extracting stats from the nested 'personalstats' dictionary
+            personal_stats = user_data.get('personalstats', {})
             stats = {
-                'strength': user_data.get('strength', 0),
-                'speed': user_data.get('speed', 0),
-                'defense': user_data.get('defense', 0),
-                'dexterity': user_data.get('dexterity', 0)
+                'strength': personal_stats.get('strength', 0),
+                'speed': personal_stats.get('speed', 0),
+                'defense': personal_stats.get('defense', 0),
+                'dexterity': personal_stats.get('dexterity', 0)
             }
-            total = sum(stats.values())
+            # Total stats might be provided directly, otherwise calculate manually
+            total = personal_stats.get('totalstats', sum(stats.values()))
+            
+            print(f"Stats: {stats}")
+            print(f"Total stats: {total}")
 
             formatted_date = target_date.strftime('%d %B %Y')
 
