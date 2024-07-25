@@ -32,6 +32,28 @@ print("DISCORD_ID = ", DISCORD_ID)
 # cred = credentials.Certificate(firebase_credentials)
 # firebase_admin.initialize_app(cred)
 
+def calculate_stat_changes(current_stats, previous_stats):
+    change_in_stats = ""
+    percentage_change = ""
+    
+    for stat in ['strength', 'speed', 'defense', 'dexterity']:
+        change = current_stats.get(stat, 0) - previous_stats.get(stat, 0)
+        previous_stat_value = previous_stats.get(stat, 0)
+        percent_change = ((change / previous_stat_value) * 100) if previous_stat_value != 0 else 0
+
+        change_in_stats += f"{stat.capitalize()}: {change:,}\n"
+        percentage_change += f"{stat.capitalize()}: {percent_change:.2f}%\n"
+
+    total_current = sum(current_stats.values())
+    total_previous = previous_stats.get('total', 0)
+    total_change = total_current - total_previous
+    total_percent_change = ((total_change / total_previous) * 100) if total_previous != 0 else 0
+
+    change_in_stats += f"Total: {total_change:,}\n"
+    percentage_change += f"Total: {total_percent_change:.2f}%\n"
+
+    return change_in_stats, percentage_change, total_current, total_previous
+
 
 def get_user_details():
     url = f'https://api.torn.com/user/?selections=profile&key={TOKEN}'
@@ -167,7 +189,6 @@ def get_user_stats(discord_id):
 
 def get_user_stat_history(discord_id, days_ago):
     discord_id = str(discord_id)
-
     db = get_firestore_db()
     user_doc = db.collection('user_keys').document(discord_id).get()
     if user_doc.exists:
@@ -183,41 +204,58 @@ def get_user_stat_history(discord_id, days_ago):
     if not user_timezone_str:
         return "User timezone not set. Please set your timezone using !timezone command."
 
-    # Calculate the timezone for days_ago 
-    target_date = datetime.utcnow() - timedelta(days=days_ago)
-    unix_timestamp = int(target_date.timestamp())
-    print("timestamp = ", unix_timestamp)
-    url = f'https://api.torn.com/user/?key={torn_api_key}&timestamp={unix_timestamp}&stat=strength,defense,speed,dexterity,totalstats&comment=TornAPI&selections=personalstats'
-    #url = f'https://api.torn.com/user/?selections=battlestats&timestamp={unix_timestamp}&key={torn_api_key}'
+    # Get current battle stats
+    url = f'https://api.torn.com/user/?selections=battlestats&key={torn_api_key}'
     try:
         response = requests.get(url)
         if response.status_code == 200:
             user_data = response.json()
-            print("User data =", user_data)
-            
-            # Extracting stats from the nested 'personalstats' dictionary
+            current_stats = {
+                'strength': user_data.get('strength', 0),
+                'speed': user_data.get('speed', 0),
+                'defense': user_data.get('defense', 0),
+                'dexterity': user_data.get('dexterity', 0)
+            }
+
+    except requests.exceptions.RequestException as e:
+        return f"Error fetching data: {e}"
+
+    # Get historical stats for the specified date
+    target_date = datetime.utcnow() - timedelta(days=days_ago)
+    unix_timestamp = int(target_date.timestamp())
+    url = f'https://api.torn.com/user/?key={torn_api_key}&timestamp={unix_timestamp}&stat=strength,defense,speed,dexterity,totalstats&comment=TornAPI&selections=personalstats'
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            user_data = response.json()
             personal_stats = user_data.get('personalstats', {})
-            stats = {
+            previous_stats = {
                 'strength': personal_stats.get('strength', 0),
                 'speed': personal_stats.get('speed', 0),
                 'defense': personal_stats.get('defense', 0),
-                'dexterity': personal_stats.get('dexterity', 0)
+                'dexterity': personal_stats.get('dexterity', 0),
+                'total': personal_stats.get('totalstats', sum(personal_stats.values()))
             }
-            # Total stats might be provided directly, otherwise calculate manually
-            total = personal_stats.get('totalstats', sum(stats.values()))
-            
-            print(f"Stats: {stats}")
-            print(f"Total stats: {total}")
+
+            # Calculate changes
+            change_in_stats, percentage_change, total_current, total_previous = calculate_stat_changes(current_stats, previous_stats)
 
             formatted_date = target_date.strftime('%d %B %Y')
-
             stats_details = (
                 f"Battle Stats as of {formatted_date}:\n"
-                f"Strength: {stats['strength']:,}\n"
-                f"Speed: {stats['speed']:,}\n"
-                f"Defense: {stats['defense']:,}\n"
-                f"Dexterity: {stats['dexterity']:,}\n"
-                f"Total: {total:,}\n"
+                f"Strength: {previous_stats['strength']:,}\n"
+                f"Speed: {previous_stats['speed']:,}\n"
+                f"Defense: {previous_stats['defense']:,}\n"
+                f"Dexterity: {previous_stats['dexterity']:,}\n"
+                f"Total: {previous_stats['total']:,}\n\n"
+                f"Current Stats:\n"
+                f"Strength: {current_stats['strength']:,}\n"
+                f"Speed: {current_stats['speed']:,}\n"
+                f"Defense: {current_stats['defense']:,}\n"
+                f"Dexterity: {current_stats['dexterity']:,}\n"
+                f"Total: {total_current:,}\n\n"
+                f"Change in Stats:\n{change_in_stats}"
+                f"\nPercentage Change:\n{percentage_change}"
             )
 
             return stats_details
@@ -225,7 +263,7 @@ def get_user_stat_history(discord_id, days_ago):
             return f"Error fetching data: {response.status_code}"
         
     except requests.exceptions.RequestException as e:
-        return f"Error fetching data: {e}" 
+        return f"Error fetching data: {e}"
 
 def get_user_profile():
     url = f'https://api.torn.com/user/?selections=profile&key={TOKEN}'
