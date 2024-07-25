@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import requests
 import os
 from dotenv import load_dotenv
@@ -165,6 +165,59 @@ def get_user_stats(discord_id):
     except requests.exceptions.RequestException as e:
         return f"Error fetching data: {e}"
 
+def get_user_stat_history(discord_id, days_ago):
+    discord_id = str(discord_id)
+
+    db = get_firestore_db()
+    user_doc = db.collection('user_keys').document(discord_id).get()
+    if user_doc.exists:
+        user_data = user_doc.to_dict()
+        torn_api_key = user_data.get('torn_api_key')
+        user_timezone_str = user_data.get('time_zone')
+    else:
+        return "User data not found."
+    
+    if not torn_api_key:
+        return "Torn API key not found for the user."
+    
+    if not user_timezone_str:
+        return "User timezone not set. Please set your timezone using !timezone command."
+
+    # Calculate the timezone for days_ago 
+    target_date = datetime.utcnow() - timedelta(days=days_ago)
+    unix_timestamp = int(target_date.timestamp())
+
+    url = f'https://api.torn.com/user/?key={torn_api_key}&timestamp={unix_timestamp}&stat=strength,defense,speed,dexterity,totalstats&comment=TornAPI&selections=personalstats'
+    #url = f'https://api.torn.com/user/?selections=battlestats&timestamp={unix_timestamp}&key={torn_api_key}'
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            user_data = response.json()
+            stats = {
+                'strength': user_data.get('strength', 0),
+                'speed': user_data.get('speed', 0),
+                'defense': user_data.get('defense', 0),
+                'dexterity': user_data.get('dexterity', 0)
+            }
+            total = sum(stats.values())
+
+            formatted_date = target_date.strftime('%d %B %Y')
+
+            stats_details = (
+                f"Battle Stats as of {formatted_date}:\n"
+                f"Strength: {stats['strength']:,}\n"
+                f"Speed: {stats['speed']:,}\n"
+                f"Defense: {stats['defense']:,}\n"
+                f"Dexterity: {stats['dexterity']:,}\n"
+                f"Total: {total:,}\n"
+            )
+
+            return stats_details
+        else:
+            return f"Error fetching data: {response.status_code}"
+        
+    except requests.exceptions.RequestException as e:
+        return f"Error fetching data: {e}" 
 
 def get_user_profile():
     url = f'https://api.torn.com/user/?selections=profile&key={TOKEN}'

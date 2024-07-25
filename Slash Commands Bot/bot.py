@@ -8,7 +8,7 @@ from flask import Flask
 import threading
 import requests
 import time
-from torn import get_user_details, get_user_stats, get_user_profile, get_vitals, get_eta
+from torn import get_user_details, get_user_stats, get_user_profile, get_vitals, get_eta, get_user_stat_history
 from database import insert_user_key, get_firestore_db
 import bot
 import pytz
@@ -75,6 +75,12 @@ async def user(ctx):
 async def s(ctx):
     user_stats = get_user_stats(discord_id=ctx.author.id)
     await ctx.send(user_stats)
+
+@client.command(name="sh")
+async def sh(ctx, days_ago: int):
+    discord_id = ctx.author.id
+    stat_history = get_user_stat_history(discord_id, days_ago)
+    await ctx.send(stat_history)
 
 @client.command(name="p")
 async def p(ctx):
