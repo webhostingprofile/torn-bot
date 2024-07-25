@@ -193,6 +193,7 @@ def get_user_stat_history(discord_id, days_ago):
         response = requests.get(url)
         if response.status_code == 200:
             user_data = response.json()
+            print("user data = ", user_data)
             stats = {
                 'strength': user_data.get('strength', 0),
                 'speed': user_data.get('speed', 0),
