@@ -84,7 +84,7 @@ async def sh(ctx, days_ago: int):
 
 @client.command(name="p")
 async def p(ctx):
-    user_profile = get_user_profile()
+    user_profile = get_user_profile(discord_id=ctx.author.id)
     await ctx.send(user_profile)
 
 @client.command(name="v")

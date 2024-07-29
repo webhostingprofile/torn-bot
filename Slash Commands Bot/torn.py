@@ -32,6 +32,39 @@ print("DISCORD_ID = ", DISCORD_ID)
 # cred = credentials.Certificate(firebase_credentials)
 # firebase_admin.initialize_app(cred)
 
+def get_user_torn_info(discord_id):
+    """
+    Retrieve the Torn API key and timezone for a given user from Firestore.
+
+    Parameters:
+    discord_id (str): The Discord ID of the user.
+
+    Returns:
+    dict: A dictionary containing the 'torn_api_key' and 'time_zone'.
+          If an error occurs, returns a dictionary with an 'error' key and message.
+    """
+    db = get_firestore_db()
+
+    # Fetch Torn API key and user timezone from Firestore
+    user_doc = db.collection('user_keys').document(discord_id).get()
+    if not user_doc.exists:
+        return {'error': "User data not found."}
+
+    user_data = user_doc.to_dict()
+    torn_api_key = user_data.get('torn_api_key')
+    user_timezone_str = user_data.get('time_zone')
+
+    if not torn_api_key:
+        return {'error': "Torn API key not found for the user."}
+    
+    if not user_timezone_str:
+        return {'error': "User timezone not set. Please set your timezone using !timezone command."}
+
+    return {
+        'torn_api_key': torn_api_key,
+        'time_zone': user_timezone_str
+    }
+
 def calculate_stat_changes(current_stats, previous_stats):
     change_in_stats = ""
     percentage_change = ""
@@ -83,7 +116,7 @@ def get_user_stats(discord_id):
     discord_id = str(discord_id)
     print("discord_id", discord_id)
 
-    db = get_firestore_db()  # Use the Firestore client from your database setup
+    db = get_firestore_db() 
 
     # Fetch Torn API key and user timezone from Firestore
     user_doc = db.collection('user_keys').document(discord_id).get()
@@ -265,8 +298,18 @@ def get_user_stat_history(discord_id, days_ago):
     except requests.exceptions.RequestException as e:
         return f"Error fetching data: {e}"
 
-def get_user_profile():
-    url = f'https://api.torn.com/user/?selections=profile&key={TOKEN}'
+def get_user_profile(discord_id):
+    discord_id = str(discord_id)
+
+    # Retrieve the Torn API key using the reusable function
+    user_info = get_user_torn_info(discord_id)
+    if 'error' in user_info:
+        return user_info['error']
+    
+    torn_api_key = user_info['torn_api_key']
+
+    # Use the retrieved API key in the request URL
+    url = f'https://api.torn.com/user/?selections=profile&key={torn_api_key}'
 
     try:
         response = requests.get(url)
