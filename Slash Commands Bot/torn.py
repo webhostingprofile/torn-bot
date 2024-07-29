@@ -88,8 +88,17 @@ def calculate_stat_changes(current_stats, previous_stats):
     return change_in_stats, percentage_change, total_current, total_previous
 
 
-def get_user_details():
-    url = f'https://api.torn.com/user/?selections=profile&key={TOKEN}'
+def get_user_details(discord_id):
+    discord_id = str(discord_id)
+     # Retrieve the Torn API key using the reusable function
+    user_info = get_user_torn_info(discord_id)
+    if 'error' in user_info:
+        return user_info['error']
+    
+    torn_api_key = user_info['torn_api_key']
+
+    # Use the retrieved API key in the request URL
+    url = f'https://api.torn.com/user/?selections=profile&key={torn_api_key}'
     try:
         response = requests.get(url)
         if response.status_code == 200:
@@ -110,7 +119,6 @@ def get_user_details():
             return f"Error fetching data: {response.status_code}"
     except requests.exceptions.RequestException as e:
         return f"Error fetching data: {e}"
-
 
 def get_user_stats(discord_id):
     discord_id = str(discord_id)
@@ -384,8 +392,17 @@ def format_torn_profile(data):
     """
     return formatted_profile
 
-def get_vitals():
-    url = f'https://api.torn.com/user/?selections=profile,properties,personalstats,cooldowns,bars,education&key={TOKEN}'
+def get_vitals(discord_id):
+    discord_id = str(discord_id)
+    # Retrieve the Torn API key using the reusable function
+    user_info = get_user_torn_info(discord_id)
+    if 'error' in user_info:
+        return user_info['error']
+    
+    torn_api_key = user_info['torn_api_key']
+
+    # Use the retrieved API key in the request URL
+    url = f'https://api.torn.com/user/?selections=profile,properties,personalstats,cooldowns,bars,education&key={torn_api_key}'
 
     try:
         response = requests.get(url)
@@ -398,6 +415,7 @@ def get_vitals():
             return f"Error fetching data: {response.status_code}"
     except requests.exceptions.RequestException as e:
         return f"Error fetching data: {e}"
+
 
 def format_vitals(data):
     # Extracting and formatting the necessary details

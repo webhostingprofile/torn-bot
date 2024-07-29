@@ -67,7 +67,7 @@ async def addkeys(ctx, torn_id: str, torn_api_key: str):
 
 @client.command(name='user')
 async def user(ctx):
-    user_details = get_user_details()
+    user_details = get_user_details(discord_id=ctx.author.id)
     print("user details: {}".format(user_details))
     await ctx.send(user_details)
 
@@ -89,7 +89,7 @@ async def p(ctx):
 
 @client.command(name="v")
 async def v(ctx):
-    user_vitals = get_vitals()
+    user_vitals = get_vitals(discord_id=ctx.author.id)
     await ctx.send(user_vitals)
 
 @client.command(name="eta")
