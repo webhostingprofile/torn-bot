@@ -8,7 +8,7 @@ from flask import Flask
 import threading
 import requests
 import time
-from torn import get_user_details, get_user_stats, get_user_profile, get_vitals, get_eta, get_user_stat_history
+from torn import get_user_details, get_user_stats, get_user_profile, get_vitals, get_eta, get_user_stat_history, get_user_work_stats
 from database import insert_user_key, get_firestore_db
 import bot
 import pytz
@@ -96,6 +96,11 @@ async def v(ctx):
 async def eta(ctx):
     user_eta = get_eta()
     await ctx.send(user_eta)
+
+@client.command(name="ws") # work stats command 
+async def ws(ctx):
+    user_ws = get_user_work_stats(discord_id=ctx.author.id)
+    await ctx.send(user_ws)
 
 @client.hybrid_command(name='sync')
 async def sync(ctx: commands.Context):

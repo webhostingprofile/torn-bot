@@ -306,6 +306,43 @@ def get_user_stat_history(discord_id, days_ago):
     except requests.exceptions.RequestException as e:
         return f"Error fetching data: {e}"
 
+def get_user_work_stats(discord_id):
+    discord_id = str(discord_id)
+
+    user_info = get_user_torn_info(discord_id)
+    if 'error' in user_info:
+        return user_info['error']
+    
+    # Retrieve api key 
+    torn_api_key = user_info['torn_api_key']
+
+    url = f'https://api.torn.com/user/?selections=workstats&key={torn_api_key}'
+
+    try: 
+        response = requests.get(url)
+        if response.status_code == 200:
+            user_data = response.json()
+            work_stats = {
+                'manual_labor': user_data.get('manual_labor', 0),
+                'intelligence': user_data.get('intelligence', 0),
+                'endurance': user_data.get('endurance', 0),
+            }
+        else:
+            return f"Error fetching data: {response.status_code}"
+
+    except requests.exceptions.RequestException as e:
+        return f'Error fetching data: {e}'
+    
+    work_stats_formatted = (
+        f"Manual Labor: {work_stats['manual_labor']:,}\n"
+        f"Intelligence: {work_stats['intelligence']:,}\n"
+        f"Endurace: {work_stats['endurance']:,}\n"
+    )
+    return work_stats_formatted
+
+            #{"manual_labor":20238,"intelligence":40923,"endurance":90845}
+
+
 def get_user_profile(discord_id):
     discord_id = str(discord_id)
 
