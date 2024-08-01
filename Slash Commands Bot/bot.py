@@ -48,6 +48,30 @@ async def on_ready():
 async def change_status():
     await client.change_presence(activity=discord.Game(next(status)))
 
+# Example command using an embed
+@client.command(name="test")
+async def stats(ctx):
+    # This is a placeholder for your stats logic
+    discord_id = ctx.author.id
+    discord_username = f"{ctx.author.name}#{ctx.author.discriminator}"
+    torn_id = 1234567  # Replace with actual Torn ID retrieval logic
+    user_stats = "Example stats content here..."
+
+    # Creating the embed
+    embed = discord.Embed(
+        title=f"Changes to Stats for {discord_username}",
+        description=user_stats,
+        color=discord.Color.blue()  # Change color as needed
+    )
+
+    # Adding a link as an embed field or in the description
+    profile_link = f"https://www.torn.com/profiles.php?XID={torn_id}"
+    embed.add_field(name="Torn Profile", value=f"[Click here to view profile]({profile_link})", inline=False)
+
+    # Sending the embed
+    await ctx.send(embed=embed)
+
+
 @client.command(name="timezone")
 async def timezone(ctx):
     view = TimezoneView(current_page=0)
