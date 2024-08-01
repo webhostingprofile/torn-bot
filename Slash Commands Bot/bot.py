@@ -51,13 +51,13 @@ async def on_ready():
 async def change_status():
     await client.change_presence(activity=discord.Game(next(status)))
 
-async def create_embed(description, color):
-    # Create the embed
-    embed = discord.Embed(
-        description=description,
-        color=color 
-    )
-    return embed
+# async def create_embed(description, color):
+#     # Create the embed
+#     embed = discord.Embed(
+#         description=description,
+#         color=color 
+#     )
+#     return embed
 # Example command using an embed
 @client.command(name="test")
 async def stats(ctx):
@@ -103,7 +103,13 @@ async def addkeys(ctx, torn_id: str, torn_api_key: str):
 async def user(ctx):
     user_details = get_user_details(discord_id=ctx.author.id)
     print("user details: {}".format(user_details))
-    embed = create_embed(user_details, BLUE)
+    # Create the embed
+    embed = discord.Embed(
+        #title=f"Stat History For {ctx.author.id}",
+        description=user_details,
+        color=BLUE 
+    )
+    # Send the embed
     await ctx.send(embed=embed)
     #await ctx.send(user_details)
 
@@ -112,47 +118,75 @@ async def s(ctx):
 
     user_stats = get_user_stats(discord_id=ctx.author.id, discord_username=ctx.author.name)
         
-    # create the embed 
-    embed = create_embed(user_stats, BLUE)
+    # Create the embed
+    embed = discord.Embed(
+        #title=f"Changes to Stats for {ctx.author.id}",
+        description=user_stats,
+        color=discord.Color.blue()  # You can choose other colors
+    )
     # Send the embed
-    await ctx.send(embed)
+    await ctx.send(embed=embed)
 
 @client.command(name="sh")
 async def sh(ctx, days_ago: int):
     discord_id = ctx.author.id
     stat_history = get_user_stat_history(discord_id, ctx.author.name ,days_ago)
-    embed = create_embed(stat_history, BLUE)
+    # Create the embed
+    embed = discord.Embed(
+        #title=f"Stat History For {ctx.author.id}",
+        description=stat_history,
+        color=BLUE 
+    )
+    # Send the embed
     await ctx.send(embed=embed)
-    #await ctx.send(stat_history)
 
 @client.command(name="p")
 async def p(ctx):
     user_profile = get_user_profile(ctx.author.id, ctx.author.name)
-    embed = create_embed(user_profile, BLUE)
+    # Create the embed
+    embed = discord.Embed(
+        #title=f"Stat History For {ctx.author.id}",
+        description=user_profile,
+        color=BLUE 
+    )
+    # Send the embed
     await ctx.send(embed=embed)
-    #await ctx.send(user_profile)
 
 @client.command(name="v")
 async def v(ctx):
     user_vitals = get_vitals(discord_id=ctx.author.id)
-    embed = create_embed(user_vitals, BLUE)
+    # Create the embed
+    embed = discord.Embed(
+        #title=f"Stat History For {ctx.author.id}",
+        description=user_vitals,
+        color=BLUE 
+    )
+    # Send the embed
     await ctx.send(embed=embed)
-    #await ctx.send(user_vitals)
 
 @client.command(name="eta")
 async def eta(ctx):
     user_eta = get_eta()
-    embed = create_embed(user_eta, BLUE)
+    # Create the embed
+    embed = discord.Embed(
+        #title=f"Stat History For {ctx.author.id}",
+        description=user_eta,
+        color=BLUE 
+    )
+    # Send the embed
     await ctx.send(embed=embed)
-    #await ctx.send(user_eta)
 
 @client.command(name="ws") # work stats command 
 async def ws(ctx):
     user_ws = get_user_work_stats(discord_id=ctx.author.id)
-    embed = create_embed(user_ws, BLUE)
+    # Create the embed
+    embed = discord.Embed(
+        #title=f"Stat History For {ctx.author.id}",
+        description=user_ws,
+        color=BLUE 
+    )
+    # Send the embed
     await ctx.send(embed=embed)
-    #await ctx.send(user_ws)
-
 @client.hybrid_command(name='sync')
 async def sync(ctx: commands.Context):
     await ctx.send("Syncing...")
