@@ -93,16 +93,16 @@ async def info(ctx):
         "The bot will store your Torn ID and API key securely, allowing it to access your "
         "Torn account information and provide personalized data.\n\n"
 
+        "**Note:**\n"
+        "- Make sure to send `!addkeys` in a private message (DM) to avoid exposing your API key publicly.\n"
+        "- If you encounter any issues, please contact the bot administrator for assistance."
+
         "**!timezone**\n"
         "Use this command to set your timezone offset from Torn City Time (TCT). "
         "When you call this command, the bot will prompt you to select your offset from TCT. "
         "This helps in adjusting the time-related data based on your local timezone.\n\n"
         
 
-        
-        "**Note:**\n"
-        "- Make sure to send `!addkeys` in a private message (DM) to avoid exposing your API key publicly.\n"
-        "- If you encounter any issues, please contact the bot administrator for assistance."
     )
 
     # Send the information as a message
