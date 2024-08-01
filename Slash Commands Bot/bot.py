@@ -115,7 +115,7 @@ async def s(ctx):
     # create the embed 
     embed = create_embed(user_stats, BLUE)
     # Send the embed
-    await ctx.send(embed=embed)
+    await ctx.send(embed)
 
 @client.command(name="sh")
 async def sh(ctx, days_ago: int):
@@ -129,7 +129,7 @@ async def sh(ctx, days_ago: int):
 async def p(ctx):
     user_profile = get_user_profile(ctx.author.id, ctx.author.name)
     embed = create_embed(user_profile, BLUE)
-    await ctx.send(emebed=embed)
+    await ctx.send(embed=embed)
     #await ctx.send(user_profile)
 
 @client.command(name="v")
