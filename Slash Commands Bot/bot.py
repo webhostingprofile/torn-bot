@@ -99,8 +99,14 @@ async def user(ctx):
 async def s(ctx):
 
     user_stats = get_user_stats(discord_id=ctx.author.id, discord_username=ctx.author.name)
-    await ctx.send(user_stats)
-
+        # Create the embed
+    embed = discord.Embed(
+        title=f"Changes to Stats for {ctx.author.id}",
+        description=user_stats,
+        color=discord.Color.blue()  # You can choose other colors
+    )
+    # Send the embed
+    await ctx.send(embed=embed)
 @client.command(name="sh")
 async def sh(ctx, days_ago: int):
     discord_id = ctx.author.id
