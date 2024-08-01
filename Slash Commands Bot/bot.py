@@ -116,7 +116,7 @@ async def user(ctx):
 @client.command(name="s")
 async def s(ctx):
 
-    user_stats = get_user_stats(discord_id=ctx.author.id, discord_username=ctx.author.name)
+    user_stats = await get_user_stats(discord_id=ctx.author.id, discord_username=ctx.author.name)
         
     # Create the embed
     embed = discord.Embed(
