@@ -127,7 +127,7 @@ async def addkeys(ctx, torn_id: str, torn_api_key: str):
 
 @client.command(name='user')
 async def user(ctx):
-    user_details = await get_user_details(discord_id=ctx.author.id)
+    user_details =  get_user_details(discord_id=ctx.author.id)
     print("user details: {}".format(user_details))
     # Create the embed
     embed = discord.Embed(
@@ -142,7 +142,7 @@ async def user(ctx):
 @client.command(name="s")
 async def s(ctx):
 
-    user_stats = await get_user_stats(discord_id=ctx.author.id, discord_username=ctx.author.name)
+    user_stats = get_user_stats(discord_id=ctx.author.id, discord_username=ctx.author.name)
         
     # Create the embed
     embed = discord.Embed(
@@ -156,7 +156,7 @@ async def s(ctx):
 @client.command(name="sh")
 async def sh(ctx, days_ago: int):
     discord_id = ctx.author.id
-    stat_history = await get_user_stat_history(discord_id, ctx.author.name ,days_ago)
+    stat_history = get_user_stat_history(discord_id, ctx.author.name ,days_ago)
     # Create the embed
     embed = discord.Embed(
         #title=f"Stat History For {ctx.author.id}",
@@ -168,7 +168,7 @@ async def sh(ctx, days_ago: int):
 
 @client.command(name="p")
 async def p(ctx):
-    user_profile = await get_user_profile(ctx.author.id, ctx.author.name)
+    user_profile = get_user_profile(ctx.author.id, ctx.author.name)
     # Create the embed
     embed = discord.Embed(
         #title=f"Stat History For {ctx.author.id}",
@@ -180,7 +180,7 @@ async def p(ctx):
 
 @client.command(name="v")
 async def v(ctx):
-    user_vitals = await get_vitals(discord_id=ctx.author.id)
+    user_vitals =  get_vitals(discord_id=ctx.author.id)
     # Create the embed
     embed = discord.Embed(
         #title=f"Stat History For {ctx.author.id}",
@@ -192,7 +192,7 @@ async def v(ctx):
 
 @client.command(name="eta")
 async def eta(ctx):
-    user_eta = await get_eta()
+    user_eta =  get_eta()
     # Create the embed
     embed = discord.Embed(
         #title=f"Stat History For {ctx.author.id}",
@@ -204,7 +204,7 @@ async def eta(ctx):
 
 @client.command(name="ws") # work stats command 
 async def ws(ctx):
-    user_ws = await get_user_work_stats(discord_id=ctx.author.id)
+    user_ws =  get_user_work_stats(discord_id=ctx.author.id)
     # Create the embed
     embed = discord.Embed(
         #title=f"Stat History For {ctx.author.id}",
