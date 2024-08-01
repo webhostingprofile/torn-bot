@@ -81,6 +81,29 @@ async def stats(ctx):
     # Sending the embed
     await ctx.send(embed=embed)
 
+@client.command(name="info")
+async def info(ctx):
+    info_message = (
+        "**Bot Command Information**\n\n"
+        "**!timezone**\n"
+        "Use this command to set your timezone offset from Torn City Time (TCT). "
+        "When you call this command, the bot will prompt you to select your offset from TCT. "
+        "This helps in adjusting the time-related data based on your local timezone.\n\n"
+        
+        "**!addkeys**\n"
+        "This command is used to register your Torn ID and API key with the bot. "
+        "Use this command in a direct message to the bot for security reasons. "
+        "The syntax is `!addkeys <Torn_ID> <Torn_API_Key>`. "
+        "The bot will store your Torn ID and API key securely, allowing it to access your "
+        "Torn account information and provide personalized data.\n\n"
+        
+        "**Note:**\n"
+        "- Make sure to send `!addkeys` in a private message (DM) to avoid exposing your API key publicly.\n"
+        "- If you encounter any issues, please contact the bot administrator for assistance."
+    )
+
+    # Send the information as a message
+    await ctx.send(info_message)
 
 @client.command(name="timezone")
 async def timezone(ctx):
@@ -101,7 +124,7 @@ async def addkeys(ctx, torn_id: str, torn_api_key: str):
 
 @client.command(name='user')
 async def user(ctx):
-    user_details = get_user_details(discord_id=ctx.author.id)
+    user_details = await get_user_details(discord_id=ctx.author.id)
     print("user details: {}".format(user_details))
     # Create the embed
     embed = discord.Embed(
@@ -130,7 +153,7 @@ async def s(ctx):
 @client.command(name="sh")
 async def sh(ctx, days_ago: int):
     discord_id = ctx.author.id
-    stat_history = get_user_stat_history(discord_id, ctx.author.name ,days_ago)
+    stat_history = await get_user_stat_history(discord_id, ctx.author.name ,days_ago)
     # Create the embed
     embed = discord.Embed(
         #title=f"Stat History For {ctx.author.id}",
@@ -142,7 +165,7 @@ async def sh(ctx, days_ago: int):
 
 @client.command(name="p")
 async def p(ctx):
-    user_profile = get_user_profile(ctx.author.id, ctx.author.name)
+    user_profile = await get_user_profile(ctx.author.id, ctx.author.name)
     # Create the embed
     embed = discord.Embed(
         #title=f"Stat History For {ctx.author.id}",
@@ -154,7 +177,7 @@ async def p(ctx):
 
 @client.command(name="v")
 async def v(ctx):
-    user_vitals = get_vitals(discord_id=ctx.author.id)
+    user_vitals = await get_vitals(discord_id=ctx.author.id)
     # Create the embed
     embed = discord.Embed(
         #title=f"Stat History For {ctx.author.id}",
@@ -166,7 +189,7 @@ async def v(ctx):
 
 @client.command(name="eta")
 async def eta(ctx):
-    user_eta = get_eta()
+    user_eta = await get_eta()
     # Create the embed
     embed = discord.Embed(
         #title=f"Stat History For {ctx.author.id}",
@@ -178,7 +201,7 @@ async def eta(ctx):
 
 @client.command(name="ws") # work stats command 
 async def ws(ctx):
-    user_ws = get_user_work_stats(discord_id=ctx.author.id)
+    user_ws = await get_user_work_stats(discord_id=ctx.author.id)
     # Create the embed
     embed = discord.Embed(
         #title=f"Stat History For {ctx.author.id}",
