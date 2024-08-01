@@ -57,7 +57,7 @@ def get_user_torn_info(discord_id):
     user_data = user_doc.to_dict()
     torn_api_key = user_data.get('torn_api_key')
     user_timezone_str = user_data.get('time_zone')
-
+    torn_id = user_data.get('torn_id')
     if not torn_api_key:
         return {'error': "Torn API key not found for the user."}
     
@@ -66,7 +66,8 @@ def get_user_torn_info(discord_id):
 
     return {
         'torn_api_key': torn_api_key,
-        'time_zone': user_timezone_str
+        'time_zone': user_timezone_str,
+        'torn_id': torn_id,
     }
 
 def calculate_stat_changes(current_stats, previous_stats):
@@ -232,7 +233,7 @@ def get_user_stats(discord_id, discord_username):
     except requests.exceptions.RequestException as e:
         return f"Error fetching data: {e}"
 
-def get_user_stat_history(discord_id, days_ago):
+def get_user_stat_history(discord_id, discord_username, days_ago):
     discord_id = str(discord_id)
     db = get_firestore_db()
     user_doc = db.collection('user_keys').document(discord_id).get()
@@ -240,6 +241,7 @@ def get_user_stat_history(discord_id, days_ago):
         user_data = user_doc.to_dict()
         torn_api_key = user_data.get('torn_api_key')
         user_timezone_str = user_data.get('time_zone')
+        torn_id = user_data.get('torn_id')
     else:
         return "User data not found."
     
@@ -285,9 +287,11 @@ def get_user_stat_history(discord_id, days_ago):
             # Calculate changes
             change_in_stats, percentage_change, total_current, total_previous = calculate_stat_changes(current_stats, previous_stats)
 
+            link_text = f"Battle Stata changes for {discord_username}"
+            profile_link = get_user_profile_link(torn_id, link_text)
             formatted_date = target_date.strftime('%d %B %Y')
             stats_details = (
-                f"Battle Stats as of {formatted_date}:\n"
+                f"{profile_link}:\n\n"
                 f"Strength: {previous_stats['strength']:,}\n"
                 f"Speed: {previous_stats['speed']:,}\n"
                 f"Defense: {previous_stats['defense']:,}\n"
@@ -301,6 +305,7 @@ def get_user_stat_history(discord_id, days_ago):
                 f"Total: {total_current:,}\n\n"
                 f"Change in Stats:\n{change_in_stats}"
                 f"\nPercentage Change:\n{percentage_change}"
+                 f"Changes Since: {formatted_date}:\n"
             )
 
             return stats_details
@@ -319,6 +324,7 @@ def get_user_work_stats(discord_id):
     
     # Retrieve api key 
     torn_api_key = user_info['torn_api_key']
+    torn_id = user_info['torn_id']
 
     url = f'https://api.torn.com/user/?selections=workstats&key={torn_api_key}'
 
@@ -347,7 +353,7 @@ def get_user_work_stats(discord_id):
             #{"manual_labor":20238,"intelligence":40923,"endurance":90845}
 
 
-def get_user_profile(discord_id):
+def get_user_profile(discord_id, discord_username):
     discord_id = str(discord_id)
 
     # Retrieve the Torn API key using the reusable function
@@ -356,6 +362,8 @@ def get_user_profile(discord_id):
         return user_info['error']
     
     torn_api_key = user_info['torn_api_key']
+    torn_id = user_info['torn_id']
+    
 
     # Use the retrieved API key in the request URL
     url = f'https://api.torn.com/user/?selections=profile&key={torn_api_key}'
@@ -365,8 +373,11 @@ def get_user_profile(discord_id):
         if response.status_code == 200:
             user_data = response.json()
             print("user profile data ", user_data)
+            link_text = f"Profile Data for {discord_username}"
+            profile_link = get_user_profile_link(torn_id, link_text)
             profile_formatted = format_torn_profile(user_data)
-            return profile_formatted
+            profile_formatted_with_link = f"{profile_link}\n\n{profile_formatted}"
+            return profile_formatted_with_link
         else:
             return f"Error fetching data: {response.status_code}"
     except requests.exceptions.RequestException as e:

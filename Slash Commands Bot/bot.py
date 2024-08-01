@@ -120,14 +120,14 @@ async def s(ctx):
 @client.command(name="sh")
 async def sh(ctx, days_ago: int):
     discord_id = ctx.author.id
-    stat_history = get_user_stat_history(discord_id, days_ago)
+    stat_history = get_user_stat_history(discord_id, ctx.author.name ,days_ago)
     embed = create_embed(stat_history, BLUE)
     await ctx.send(embed=embed)
     #await ctx.send(stat_history)
 
 @client.command(name="p")
 async def p(ctx):
-    user_profile = get_user_profile(discord_id=ctx.author.id)
+    user_profile = get_user_profile(ctx.author.id, ctx.author.name)
     embed = create_embed(user_profile, BLUE)
     await ctx.send(emebed=embed)
     #await ctx.send(user_profile)
