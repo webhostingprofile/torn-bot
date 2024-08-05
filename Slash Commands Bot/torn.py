@@ -625,7 +625,7 @@ def get_effective_battlestats(discord_id, discord_username):
         return battle_stats['error']
     
     user_data = response.json()
-    # Extracting the raw stats and modifiers
+    # Extracting the raw stats
     current_stats = {
         'strength': user_data.get('strength', 0),
         'speed': user_data.get('speed', 0),
@@ -656,8 +656,8 @@ def get_effective_battlestats(discord_id, discord_username):
 
     # Helper function to format modifier details
     def format_modifier_info(modifier, info):
-        details = [f"{item['source']} {item['value']}%" for item in info]
-        return f"{modifier}%\n" + "\n".join(details)
+        details = "\n".join(info)
+        return f"{modifier}%\n{details}"
 
     # Formatting the output
     output = (
@@ -681,6 +681,7 @@ def get_effective_battlestats(discord_id, discord_username):
     )
     
     return output
+
 
 
 def run_torn_commands():
