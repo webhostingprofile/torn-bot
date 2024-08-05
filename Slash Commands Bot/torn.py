@@ -270,6 +270,83 @@ def get_mentioned_user_stats(mentioned_discord_id, mentioned_discord_username):
         return "Stats not found for the mentioned user."
 
 
+# Function to get user stats and their percentage makeup
+def get_user_stats_as_percentage(discord_id, discord_username):
+    discord_id = str(discord_id)
+
+    db = get_firestore_db()  # Use the Firestore client from your database setup
+
+    # Fetch Torn API key and user timezone from Firestore
+    user_doc = db.collection('user_keys').document(discord_id).get()
+    if user_doc.exists:
+        user_data = user_doc.to_dict()
+        torn_api_key = user_data.get('torn_api_key')
+        user_timezone_str = user_data.get('time_zone')  # Assuming timezone is stored
+        torn_id = user_data.get('torn_id')
+    else:
+        return "User data not found."
+
+    if not torn_api_key:
+        return "Torn API key not found for the user."
+    
+    if not user_timezone_str:
+        return "User timezone not set. Please set your timezone using !timezone command."
+
+    # Fetch current user stats from Torn API
+    url = f'https://api.torn.com/user/?selections=battlestats&key={torn_api_key}'
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            user_data = response.json()
+            current_stats = {
+                'strength': user_data.get('strength', 0),
+                'speed': user_data.get('speed', 0),
+                'defense': user_data.get('defense', 0),
+                'dexterity': user_data.get('dexterity', 0)
+            }
+
+            total = sum(current_stats.values())
+
+            # Fetch previous stats from Firestore
+            stats_doc = db.collection('user_stats').document(discord_id).get()
+            if stats_doc.exists:
+                previous_stats = stats_doc.to_dict()
+                previous_stats['total'] = previous_stats.get('total', 0)
+            else:
+                previous_stats = {}
+
+            # Calculate percentage makeup of each stat
+            stat_percentages = {stat: (value / total * 100) if total > 0 else 0 for stat, value in current_stats.items()}
+
+            # Format the last_call timestamp for display
+            if 'last_call' in previous_stats:
+                last_call_timestamp = previous_stats['last_call']
+                formatted_last_call = last_call_timestamp.strftime('%d %B %Y at %H:%M:%S')
+            else:
+                formatted_last_call = "N/A"
+
+            link_text = f"Stats for {discord_username}"
+            profile_link = get_user_profile_link(torn_id, link_text)
+
+            # Formatted output for Discord
+            user_details = (
+                f"{profile_link}:\n\n"
+                f"Current Battle Stats\n"
+                f"Str: {current_stats['strength']:,} ({stat_percentages['strength']:.2f}%)\n"
+                f"Spd: {current_stats['speed']:,} ({stat_percentages['speed']:.2f}%)\n"
+                f"Dex: {current_stats['dexterity']:,} ({stat_percentages['dexterity']:.2f}%)\n"
+                f"Def: {current_stats['defense']:,} ({stat_percentages['defense']:.2f}%)\n\n"
+                f"Total: {total:,}\n\n"
+                f"Last updated: {formatted_last_call}"
+            )
+
+            return user_details
+
+        else:
+            return f"Error fetching data: {response.status_code}"
+    except requests.exceptions.RequestException as e:
+        return f"Error fetching data: {e}"
+
 def get_user_stat_history(discord_id, discord_username, days_ago):
     discord_id = str(discord_id)
     db = get_firestore_db()
