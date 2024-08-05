@@ -287,7 +287,7 @@ def get_user_stat_history(discord_id, discord_username, days_ago):
             # Calculate changes
             change_in_stats, percentage_change, total_current, total_previous = calculate_stat_changes(current_stats, previous_stats)
 
-            link_text = f"Battle Stata changes for {discord_username}"
+            link_text = f"Battle Stat changes for {discord_username}"
             profile_link = get_user_profile_link(torn_id, link_text)
             formatted_date = target_date.strftime('%d %B %Y')
             stats_details = (
@@ -564,6 +564,77 @@ def format_time_left(seconds):
         time_left_str.append(f"{seconds} second{'s' if seconds != 1 else ''}")
 
     return ", ".join(time_left_str)
+
+
+def get_effective_battlestats(discord_id, discord_username):
+    discord_id = str(discord_id)
+    # Retrieve the Torn API key using the reusable function
+    user_info = get_user_torn_info(discord_id)
+    if 'error' in user_info:
+        return user_info['error']
+    
+    torn_api_key = user_info['torn_api_key']
+    torn_id = user_info['torn_id']
+    url = f'https://api.torn.com/user/?selections=battlestats&key={torn_api_key}'
+
+    # Make the API call to retrieve battle stats
+    response = requests.get(url)
+    if response.status_code != 200:
+        return f"Error: Unable to fetch data. Status code: {response.status_code}"
+    
+    battle_stats = response.json()
+    
+    if 'error' in battle_stats:
+        return battle_stats['error']
+    
+    # Extracting the raw stats and modifiers
+    strength = battle_stats.get('strength', 0)
+    speed = battle_stats.get('speed', 0)
+    dexterity = battle_stats.get('dexterity', 0)
+    defense = battle_stats.get('defense', 0)
+    
+    strength_modifier = battle_stats.get('strength_modifier', 0)
+    speed_modifier = battle_stats.get('speed_modifier', 0)
+    dexterity_modifier = battle_stats.get('dexterity_modifier', 0)
+    defense_modifier = battle_stats.get('defense_modifier', 0)
+
+    # Extracting the stat info
+    strength_info = battle_stats.get('strength_info', [])
+    speed_info = battle_stats.get('speed_info', [])
+    dexterity_info = battle_stats.get('dexterity_info', [])
+    defense_info = battle_stats.get('defense_info', [])
+    
+    # Calculating modified stats
+    modified_strength = strength * (1 + strength_modifier / 100)
+    modified_speed = speed * (1 + speed_modifier / 100)
+    modified_dexterity = dexterity * (1 + dexterity_modifier / 100)
+    modified_defense = defense * (1 + defense_modifier / 100)
+    
+    link_text = f"Total Battle Stats for {discord_username}"
+    profile_link = get_user_profile_link(torn_id, link_text)
+
+    # Formatting the output
+    output = (
+        f"{profile_link}:\n\n"
+        f"Base Battle Stats:\n\n"
+        f"Strength: \n {strength}\n"
+        f"Speed: \n {speed}\n"
+        f"Dexterity: \n {dexterity}\n"
+        f"Defense: \n {defense}\n\n"
+        
+        f"Effective Battle Stats:\n\n"
+        f"Strength: \n {modified_strength} ({strength_modifier}%)\n"
+        f"Speed: \n {modified_speed} ({speed_modifier}%)\n"
+        f"Dexterity: \n {modified_dexterity} ({dexterity_modifier}%)\n"
+        f"Defense: \n {modified_defense} ({defense_modifier}%)\n\n"
+
+        f"Strength Info: {'; '.join(strength_info)}\n"
+        f"Speed Info: {'; '.join(speed_info)}\n"
+        f"Dexterity Info: {'; '.join(dexterity_info)}\n"
+        f"Defense Info: {'; '.join(defense_info)}\n"
+    )
+    
+    return output
 
 def run_torn_commands():
     get_user_details()

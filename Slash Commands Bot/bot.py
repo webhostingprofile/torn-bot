@@ -8,7 +8,7 @@ from flask import Flask
 import threading
 import requests
 import time
-from torn import get_user_details, get_user_stats, get_user_profile, get_vitals, get_eta, get_user_stat_history, get_user_work_stats
+from torn import get_user_details, get_user_stats, get_user_profile, get_vitals, get_eta, get_user_stat_history, get_user_work_stats, get_effective_battlestats
 from database import insert_user_key, get_firestore_db
 import bot
 import pytz
@@ -166,6 +166,18 @@ async def sh(ctx, days_ago: int):
     # Send the embed
     await ctx.send(embed=embed)
 
+@client.command(name="fs")
+async def fs(ctx):
+    user_effective_battle_stats = get_effective_battlestats(ctx.author.id, ctx.author.name)
+    # Create the embed
+    embed = discord.Embed(
+        #title=f"Stat History For {ctx.author.id}",
+        description=user_effective_battle_stats,
+        color=BLUE 
+    )
+
+    # Send the embed
+    await ctx.send(embed=embed)
 @client.command(name="p")
 async def p(ctx):
     user_profile = get_user_profile(ctx.author.id, ctx.author.name)
