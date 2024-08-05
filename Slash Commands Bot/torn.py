@@ -646,10 +646,10 @@ def get_effective_battlestats(discord_id, discord_username):
     defense_info = battle_stats.get('defense_info', [])
     
     # Calculating modified stats
-    modified_strength = current_stats['strength'] * (1 + strength_modifier / 100)
-    modified_speed = current_stats['speed'] * (1 + speed_modifier / 100)
-    modified_dexterity = current_stats['dexterity'] * (1 + dexterity_modifier / 100)
-    modified_defense = current_stats['defense'] * (1 + defense_modifier / 100)
+    modified_strength = round(current_stats['strength'] * (1 + strength_modifier / 100))
+    modified_speed = round(current_stats['speed'] * (1 + speed_modifier / 100))
+    modified_dexterity = round(current_stats['dexterity'] * (1 + dexterity_modifier / 100))
+    modified_defense = round(current_stats['defense'] * (1 + defense_modifier / 100))
     
     link_text = f"Total Battle Stats for {discord_username}"
     profile_link = get_user_profile_link(torn_id, link_text)
@@ -659,29 +659,29 @@ def get_effective_battlestats(discord_id, discord_username):
         details = "\n".join(info)
         return f"{modifier}%\n{details}"
 
-    # Formatting the output
+    # Formatting the output with commas and rounding
     output = (
         f"{profile_link}:\n\n"
         f"Base Battle Stats:\n\n"
-        f"Strength: \n {current_stats['strength']}\n"
-        f"Speed: \n {current_stats['speed']}\n"
-        f"Dexterity: \n {current_stats['dexterity']}\n"
-        f"Defense: \n {current_stats['defense']}\n\n"
+        f"Strength: {current_stats['strength']:,}\n"
+        f"Speed: {current_stats['speed']:,}\n"
+        f"Dexterity: {current_stats['dexterity']:,}\n"
+        f"Defense: {current_stats['defense']:,}\n\n"
         
         f"Effective Battle Stats:\n\n"
-        f"Modified Strength: \n {modified_strength} ({strength_modifier}%)\n"
-        f"Modified Speed: \n {modified_speed} ({speed_modifier}%)\n"
-        f"Modified Dexterity: \n {modified_dexterity} ({dexterity_modifier}%)\n"
-        f"Modified Defense: \n {modified_defense} ({defense_modifier}%)\n"
+        f"Modified Strength: {modified_strength:,} ({strength_modifier}%)\n"
+        f"Modified Speed: {modified_speed:,} ({speed_modifier}%)\n"
+        f"Modified Dexterity: {modified_dexterity:,} ({dexterity_modifier}%)\n"
+        f"Modified Defense: {modified_defense:,} ({defense_modifier}%)\n\n"
 
         f"Strength Modifier: {format_modifier_info(strength_modifier, strength_info)}\n\n"
         f"Speed Modifier: {format_modifier_info(speed_modifier, speed_info)}\n\n"
         f"Dexterity Modifier: {format_modifier_info(dexterity_modifier, dexterity_info)}\n\n"
         f"Defense Modifier: {format_modifier_info(defense_modifier, defense_info)}\n\n"
-
     )
     
     return output
+
 
 
 
