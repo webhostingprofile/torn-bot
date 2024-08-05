@@ -624,12 +624,16 @@ def get_effective_battlestats(discord_id, discord_username):
     if 'error' in battle_stats:
         return battle_stats['error']
     
+    user_data = response.json()
     # Extracting the raw stats and modifiers
-    strength = battle_stats.get('strength', 0)
-    speed = battle_stats.get('speed', 0)
-    dexterity = battle_stats.get('dexterity', 0)
-    defense = battle_stats.get('defense', 0)
+    current_stats = {
+        'strength': user_data.get('strength', 0),
+        'speed': user_data.get('speed', 0),
+        'defense': user_data.get('defense', 0),
+        'dexterity': user_data.get('dexterity', 0)
+    }
     
+    # Extracting modifiers
     strength_modifier = battle_stats.get('strength_modifier', 0)
     speed_modifier = battle_stats.get('speed_modifier', 0)
     dexterity_modifier = battle_stats.get('dexterity_modifier', 0)
@@ -642,36 +646,42 @@ def get_effective_battlestats(discord_id, discord_username):
     defense_info = battle_stats.get('defense_info', [])
     
     # Calculating modified stats
-    modified_strength = strength * (1 + strength_modifier / 100)
-    modified_speed = speed * (1 + speed_modifier / 100)
-    modified_dexterity = dexterity * (1 + dexterity_modifier / 100)
-    modified_defense = defense * (1 + defense_modifier / 100)
+    modified_strength = current_stats['strength'] * (1 + strength_modifier / 100)
+    modified_speed = current_stats['speed'] * (1 + speed_modifier / 100)
+    modified_dexterity = current_stats['dexterity'] * (1 + dexterity_modifier / 100)
+    modified_defense = current_stats['defense'] * (1 + defense_modifier / 100)
     
     link_text = f"Total Battle Stats for {discord_username}"
     profile_link = get_user_profile_link(torn_id, link_text)
+
+    # Helper function to format modifier details
+    def format_modifier_info(modifier, info):
+        details = [f"{item['source']} {item['value']}%" for item in info]
+        return f"{modifier}%\n" + "\n".join(details)
 
     # Formatting the output
     output = (
         f"{profile_link}:\n\n"
         f"Base Battle Stats:\n\n"
-        f"Strength: \n {strength}\n"
-        f"Speed: \n {speed}\n"
-        f"Dexterity: \n {dexterity}\n"
-        f"Defense: \n {defense}\n\n"
+        f"Strength: \n {current_stats['strength']}\n"
+        f"Speed: \n {current_stats['speed']}\n"
+        f"Dexterity: \n {current_stats['dexterity']}\n"
+        f"Defense: \n {current_stats['defense']}\n\n"
         
         f"Effective Battle Stats:\n\n"
-        f"Strength: \n {modified_strength} ({strength_modifier}%)\n"
-        f"Speed: \n {modified_speed} ({speed_modifier}%)\n"
-        f"Dexterity: \n {modified_dexterity} ({dexterity_modifier}%)\n"
-        f"Defense: \n {modified_defense} ({defense_modifier}%)\n\n"
+        f"Strength Modifier: {format_modifier_info(strength_modifier, strength_info)}\n\n"
+        f"Speed Modifier: {format_modifier_info(speed_modifier, speed_info)}\n\n"
+        f"Dexterity Modifier: {format_modifier_info(dexterity_modifier, dexterity_info)}\n\n"
+        f"Defense Modifier: {format_modifier_info(defense_modifier, defense_info)}\n\n"
 
-        f"Strength Info: {'; '.join(strength_info)}\n"
-        f"Speed Info: {'; '.join(speed_info)}\n"
-        f"Dexterity Info: {'; '.join(dexterity_info)}\n"
-        f"Defense Info: {'; '.join(defense_info)}\n"
+        f"Modified Strength: \n {modified_strength}\n"
+        f"Modified Speed: \n {modified_speed}\n"
+        f"Modified Dexterity: \n {modified_dexterity}\n"
+        f"Modified Defense: \n {modified_defense}\n"
     )
     
     return output
+
 
 def run_torn_commands():
     get_user_details()
