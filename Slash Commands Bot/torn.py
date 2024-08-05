@@ -668,12 +668,12 @@ def get_effective_battlestats(discord_id, discord_username):
         f"Dexterity: \n {current_stats['dexterity']}\n"
         f"Defense: \n {current_stats['defense']}\n\n"
         
-        f"Modified Strength: \n {modified_strength} ({strength_modifier})\n"
-        f"Modified Speed: \n {modified_speed} ({speed_modifier})\n"
-        f"Modified Dexterity: \n {modified_dexterity} ({dexterity_modifier})\n"
-        f"Modified Defense: \n {modified_defense} ({defense_modifier})\n"
-
         f"Effective Battle Stats:\n\n"
+        f"Modified Strength: \n {modified_strength} ({strength_modifier}%)\n"
+        f"Modified Speed: \n {modified_speed} ({speed_modifier}%)\n"
+        f"Modified Dexterity: \n {modified_dexterity} ({dexterity_modifier}%)\n"
+        f"Modified Defense: \n {modified_defense} ({defense_modifier}%)\n"
+
         f"Strength Modifier: {format_modifier_info(strength_modifier, strength_info)}\n\n"
         f"Speed Modifier: {format_modifier_info(speed_modifier, speed_info)}\n\n"
         f"Dexterity Modifier: {format_modifier_info(dexterity_modifier, dexterity_info)}\n\n"
