@@ -8,7 +8,7 @@ from flask import Flask
 import threading
 import requests
 import time
-from torn import get_user_details, get_user_stats, get_user_profile, get_vitals, get_eta, get_user_stat_history, get_user_work_stats, get_effective_battlestats
+from torn import get_user_details, get_user_stats, get_user_profile, get_vitals, get_eta, get_user_stat_history, get_user_work_stats, get_effective_battlestats, get_mentioned_user_stats
 from database import insert_user_key, get_firestore_db
 import bot
 import pytz
@@ -140,16 +140,22 @@ async def user(ctx):
     #await ctx.send(user_details)
 
 @client.command(name="s")
-async def s(ctx):
+async def s(ctx, user: discord.User = None):
+    if user is None:
+        user_stats = get_user_stats(discord_id=ctx.author.id, discord_username=ctx.author.name)
+        print("User without @ ")
+    else:
+        print("user being atted ")
+        discord_id = user.id
+        discord_username = user.name
+        user_stats = get_mentioned_user_stats(discord_id, discord_username)
 
-    user_stats = get_user_stats(discord_id=ctx.author.id, discord_username=ctx.author.name)
-        
     # Create the embed
     embed = discord.Embed(
-        #title=f"Changes to Stats for {ctx.author.id}",
         description=user_stats,
         color=discord.Color.blue()  # You can choose other colors
     )
+
     # Send the embed
     await ctx.send(embed=embed)
 

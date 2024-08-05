@@ -232,6 +232,43 @@ def get_user_stats(discord_id, discord_username):
             return f"Error fetching data: {response.status_code}"
     except requests.exceptions.RequestException as e:
         return f"Error fetching data: {e}"
+    
+def get_mentioned_user_stats(mentioned_discord_id, mentioned_discord_username):
+    mentioned_discord_id = str(mentioned_discord_id)
+
+    db = get_firestore_db() 
+
+    # Fetch previous stats from Firestore for the mentioned user
+    stats_doc = db.collection('user_stats').document(mentioned_discord_id).get()
+    if stats_doc.exists:
+        previous_stats = stats_doc.to_dict()
+        previous_stats['total'] = previous_stats.get('total', 0)
+
+        # Format the last_call timestamp for display
+        if 'last_call' in previous_stats:
+            last_call_timestamp = previous_stats['last_call']
+            formatted_last_call = last_call_timestamp.strftime('%d %B %Y at %H:%M:%S')
+        else:
+            formatted_last_call = "N/A"
+
+        link_text = f"Stats for {mentioned_discord_username}"
+        profile_link = get_user_profile_link(previous_stats.get('torn_id', 'N/A'), link_text)
+        # Formatted output for Discord
+        user_details = (
+            f"{profile_link}:\n\n"
+            f"Current Battle Stats\n"
+            f"Str: {previous_stats.get('strength', 0):,}\n"
+            f"Spd: {previous_stats.get('speed', 0):,}\n"
+            f"Dex: {previous_stats.get('dexterity', 0):,}\n"
+            f"Def: {previous_stats.get('defense', 0):,}\n\n"
+            f"Tot: {previous_stats['total']:,}\n\n"
+            f"Last updated: {formatted_last_call}"  # display formatted timestamp
+        )
+
+        return user_details
+    else:
+        return "Stats not found for the mentioned user."
+
 
 def get_user_stat_history(discord_id, discord_username, days_ago):
     discord_id = str(discord_id)
