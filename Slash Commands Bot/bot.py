@@ -159,8 +159,8 @@ async def s(ctx, user: discord.User = None):
     # Send the embed
     await ctx.send(embed=embed)
 
-@client.command(name="fs")
-async def fs(ctx):
+@client.command(name="sp")
+async def sp(ctx):
     discord_id = ctx.author.id
     user_stats_as_percentage = get_user_stats_as_percentage(discord_id, ctx.author.name )
     # Create the embed
