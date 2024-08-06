@@ -5,7 +5,7 @@ from database import get_firestore_db
 UTC_OFFSETS = [f"TCT{n:+}" for n in range(-12, 15)]
 ITEMS_PER_PAGE = 25
 
-def get_paginated_options(page):
+def get_paginated_options(page): 
     start = page * ITEMS_PER_PAGE
     end = start + ITEMS_PER_PAGE
     return UTC_OFFSETS[start:end]

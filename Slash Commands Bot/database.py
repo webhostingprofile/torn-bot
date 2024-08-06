@@ -56,7 +56,7 @@ def test_insert_data():
     doc_ref = db.collection('user_stats').document('discord_user_id')
     doc_ref.set({
         'torn_id': 'discord_user_id',
-        'last_call': firestore.SERVER_TIMESTAMP,
+        'last_call': firestore.SERVER_TIMESTAMP, 
         'strength': 100,
         'speed': 120,
         'defense': 80,

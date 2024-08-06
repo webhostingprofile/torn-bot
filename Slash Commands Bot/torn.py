@@ -275,7 +275,7 @@ def get_user_stats_as_percentage(discord_id, discord_username):
     discord_id = str(discord_id)
 
     db = get_firestore_db()  # Use the Firestore client from your database setup
-
+ 
     # Fetch Torn API key and user timezone from Firestore
     user_doc = db.collection('user_keys').document(discord_id).get()
     if user_doc.exists:
