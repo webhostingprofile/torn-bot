@@ -170,7 +170,7 @@ def get_user_stats(discord_id, discord_username):
                 # Calculate changes and percentage changes
                 change_in_stats = ""
                 percentage_change = ""
-                for stat in ['strength', 'speed', 'defense', 'dexterity']:
+                for stat in ['strength', 'speed', 'dexterity', 'defense']:
                     change = current_stats[stat] - previous_stats.get(stat, 0)
                     percent_change = ((change / previous_stats[stat]) * 100) if previous_stats[stat] != 0 else 0
 
