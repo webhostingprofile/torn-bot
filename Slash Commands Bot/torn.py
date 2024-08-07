@@ -193,6 +193,7 @@ def get_user_stats(discord_id, discord_username):
                     f"Def: {previous_stats.get('defense', 0):,} ---> \n {current_stats['defense']:,} ({change_in_stats.splitlines()[3].split('(')[1]}\n\n"
                     f"Tot: {previous_stats['total']:,} ---> \n {total:,} ({total_percent_change:.2f}%)\n\n"
                     f"Changes since: {formatted_last_call}" # display formatted timestamp
+                    f"Changes in stats in full: {change_in_stats}"
                 )
             else:
                 user_details = (
