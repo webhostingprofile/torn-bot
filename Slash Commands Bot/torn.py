@@ -135,7 +135,7 @@ def get_user_stats(discord_id, discord_username):
     if user_doc.exists:
         user_data = user_doc.to_dict()
         torn_api_key = user_data.get('torn_api_key')
-        user_timezone_str = user_data.get('time_zone')  # Assuming timezone is stored#
+        user_timezone_str = user_data.get('time_zone')  # Assuming timezone is stored
         torn_id = user_data.get('torn_id')
     else:
         return "User data not found."
@@ -168,43 +168,35 @@ def get_user_stats(discord_id, discord_username):
                 previous_stats['total'] = previous_stats.get('total', 0)
 
                 # Calculate changes and percentage changes
-                change_in_stats = ""
-                percentage_change = ""
+                changes = {}
                 for stat in ['strength', 'speed', 'dexterity', 'defense']:
                     change = current_stats[stat] - previous_stats.get(stat, 0)
                     percent_change = ((change / previous_stats[stat]) * 100) if previous_stats[stat] != 0 else 0
-
-                    change_in_stats += f"{stat.capitalize()}: {change:,} ({percent_change:.2f}%)\n"
-                    percentage_change += f"{stat.capitalize()}: {percent_change:.2f}%\n"
+                    changes[stat] = (change, percent_change)
 
                 total_change = total - previous_stats['total']
                 total_percent_change = ((total_change / previous_stats['total']) * 100) if previous_stats['total'] != 0 else 0
 
-                change_in_stats += f"Total: {total_change:,} ({total_percent_change:.2f}%)\n"
-                
-
-                
                 # Format the last_call timestamp for display
-                if stats_doc.exists and 'last_call' in previous_stats:
+                if 'last_call' in previous_stats:
                     last_call_timestamp = previous_stats['last_call']
-                    #user_timezone = pytz.timezone(user_timezone_str)
-                    #last_call_local = last_call_timestamp.astimezone(user_timezone_str)
                     formatted_last_call = last_call_timestamp.strftime('%d %B %Y at %H:%M:%S')
                 else:
                     formatted_last_call = "N/A"
 
                 link_text = f"Changes to Stats for {discord_username}"
                 profile_link = get_user_profile_link(torn_id, link_text)
+
                 # Formatted output for Discord
                 user_details = (
                     f"{profile_link}:\n\n"
                     f"Old Battle Stats ---> New Battle Stats\n"
-                    f"Str: {previous_stats.get('strength', 0):,} ---> \n {current_stats['strength']:,} ({change_in_stats.splitlines()[0].split('(')[1]}\n"
-                    f"Spd: {previous_stats.get('speed', 0):,} ---> \n {current_stats['speed']:,} ({change_in_stats.splitlines()[1].split('(')[1]}\n"
-                    f"Dex: {previous_stats.get('dexterity', 0):,} ---> \n {current_stats['dexterity']:,} ({change_in_stats.splitlines()[2].split('(')[1]}\n"
-                    f"Def: {previous_stats.get('defense', 0):,} ---> \n {current_stats['defense']:,} ({change_in_stats.splitlines()[3].split('(')[1]}\n\n"
-                    f"Tot: {previous_stats['total']:,} ---> \n {total:,} ({total_percent_change:.2f}%)\n\n"
-                    f"Changes since: {formatted_last_call}" # display formatted timestamp
+                    f"Str: {previous_stats.get('strength', 0):,} ---> {current_stats['strength']:,} ({changes['strength'][0]:,} ({changes['strength'][1]:.2f}%))\n"
+                    f"Spd: {previous_stats.get('speed', 0):,} ---> {current_stats['speed']:,} ({changes['speed'][0]:,} ({changes['speed'][1]:.2f}%))\n"
+                    f"Dex: {previous_stats.get('dexterity', 0):,} ---> {current_stats['dexterity']:,} ({changes['dexterity'][0]:,} ({changes['dexterity'][1]:.2f}%))\n"
+                    f"Def: {previous_stats.get('defense', 0):,} ---> {current_stats['defense']:,} ({changes['defense'][0]:,} ({changes['defense'][1]:.2f}%))\n\n"
+                    f"Tot: {previous_stats['total']:,} ---> {total:,} ({total_change:,} ({total_percent_change:.2f}%))\n\n"
+                    f"Changes since: {formatted_last_call}"
                 )
             else:
                 user_details = (
