@@ -189,8 +189,8 @@ def get_user_stats(discord_id, discord_username):
                     f"Old Battle Stats ---> New Battle Stats\n"
                     f"Str: {previous_stats.get('strength', 0):,} ---> \n {current_stats['strength']:,} ({change_in_stats.splitlines()[0].split('(')[1]}\n"
                     f"Spd: {previous_stats.get('speed', 0):,} ---> \n {current_stats['speed']:,} ({change_in_stats.splitlines()[1].split('(')[1]}\n"
-                    f"Dex: {previous_stats.get('dexterity', 0):,} ---> \n {current_stats['dexterity']:,} ({change_in_stats.splitlines()[2].split('(')[1]}\n"
-                    f"Def: {previous_stats.get('defense', 0):,} ---> \n {current_stats['defense']:,} ({change_in_stats.splitlines()[3].split('(')[1]}\n\n"
+                    f"Dex: {previous_stats.get('dexterity', 0):,} ---> \n {current_stats['dexterity']:,} ({change_in_stats.splitlines()[3].split('(')[1]}\n"
+                    f"Def: {previous_stats.get('defense', 0):,} ---> \n {current_stats['defense']:,} ({change_in_stats.splitlines()[2].split('(')[1]}\n\n"
                     f"Tot: {previous_stats['total']:,} ---> \n {total:,} ({total_percent_change:.2f}%)\n\n"
                     f"Changes since: {formatted_last_call}" # display formatted timestamp
                     f"Changes in stats in full: {change_in_stats}"
