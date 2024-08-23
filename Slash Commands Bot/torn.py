@@ -205,8 +205,8 @@ def get_user_stats(discord_id, discord_username):
                     f"Def: {previous_stats.get('defense', 0):,} ---> \n {current_stats['defense']:,} ({change_in_stats.splitlines()[2].split('(')[1]}\n\n"
                     f"Tot: {previous_stats['total']:,} ---> \n {total:,} ({total_percent_change:.2f}%)\n\n"
                     f"Changes since: {formatted_last_call}" # display formatted timestamp
-                    f"Stats % for testing: {change_in_stats.splitlines()}"
-                    f"stats more testing without splitting lines: {change_in_stats}"
+                    # f"Stats % for testing: {change_in_stats.splitlines()}"
+                    # f"stats more testing without splitting lines: {change_in_stats}"
                 )
             else:
                 user_details = (
@@ -730,6 +730,10 @@ def get_effective_battlestats(discord_id, discord_username):
     modified_dexterity = round(current_stats['dexterity'] * (1 + dexterity_modifier / 100))
     modified_defense = round(current_stats['defense'] * (1 + defense_modifier / 100))
     
+    # Calculating total base and modified stats
+    total_base_stats = sum(current_stats.values())
+    total_modified_stats = modified_strength + modified_speed + modified_dexterity + modified_defense
+
     link_text = f"Total Battle Stats for {discord_username}"
     profile_link = get_user_profile_link(torn_id, link_text)
 
@@ -746,12 +750,14 @@ def get_effective_battlestats(discord_id, discord_username):
         f"Speed: {current_stats['speed']:,}\n"
         f"Dexterity: {current_stats['dexterity']:,}\n"
         f"Defense: {current_stats['defense']:,}\n\n"
+        f"Total Base Stats: {total_base_stats:,}\n\n"  # Display total base stats
         
         f"Effective Battle Stats:\n\n"
         f"Modified Strength: {modified_strength:,} ({strength_modifier}%)\n"
         f"Modified Speed: {modified_speed:,} ({speed_modifier}%)\n"
         f"Modified Dexterity: {modified_dexterity:,} ({dexterity_modifier}%)\n"
         f"Modified Defense: {modified_defense:,} ({defense_modifier}%)\n\n"
+        f"Total Modified Stats: {total_modified_stats:,}\n\n"  # Display total modified stats
 
         f"Strength Modifier: {format_modifier_info(strength_modifier, strength_info)}\n\n"
         f"Speed Modifier: {format_modifier_info(speed_modifier, speed_info)}\n\n"
