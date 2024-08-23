@@ -156,6 +156,9 @@ async def s(ctx, user: discord.User = None):
         color=discord.Color.blue()  # You can choose other colors
     )
 
+    # Set the user's profile picture as the thumbnail on the right hand side 
+    embed.set_thumbnail(url=user.avatar_url)
+
     # Send the embed
     await ctx.send(embed=embed)
 
