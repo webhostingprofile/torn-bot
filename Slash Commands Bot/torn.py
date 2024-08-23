@@ -425,6 +425,7 @@ def get_user_stat_history(discord_id, discord_username, days_ago):
                 f"Dex: {previous_stats['dexterity']:,} ---> \n {current_stats['dexterity']:,} ({percentage_change['dexterity']:.2f}%)\n"
                 f"Def: {previous_stats['defense']:,} ---> \n {current_stats['defense']:,} ({percentage_change['defense']:.2f}%)\n"
                 f"Tot: {previous_stats['total']:,} ---> \n {total_current:,} ({percentage_change['total']:.2f}%)\n\n"
+                f"Change in Stats:\n{change_in_stats}\n"
                 f"Changes Since: {formatted_date}:\n"
             )
 
