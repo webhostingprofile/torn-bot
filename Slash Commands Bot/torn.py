@@ -379,6 +379,7 @@ def get_user_stat_history(discord_id, discord_username, days_ago):
                 'defense': user_data.get('defense', 0),
                 'dexterity': user_data.get('dexterity', 0)
             }
+            total_current = sum(current_stats.values())
 
     except requests.exceptions.RequestException as e:
         return f"Error fetching data: {e}"
@@ -399,29 +400,27 @@ def get_user_stat_history(discord_id, discord_username, days_ago):
                 'dexterity': personal_stats.get('dexterity', 0),
                 'total': personal_stats.get('totalstats', sum(personal_stats.values()))
             }
+            total_previous = sum(previous_stats.values())
 
-            # Calculate changes
-            change_in_stats, percentage_change, total_current, total_previous = calculate_stat_changes(current_stats, previous_stats)
+            # Calculate changes (this is assuming your calculate_stat_changes function handles change calculations)
+            change_in_stats, percentage_change, _, _ = calculate_stat_changes(current_stats, previous_stats)
 
+            # Formatting the output in the desired format
             link_text = f"Battle Stat changes for {discord_username}"
             profile_link = get_user_profile_link(torn_id, link_text)
             formatted_date = target_date.strftime('%d %B %Y')
+
             stats_details = (
                 f"{profile_link}:\n\n"
-                f"Strength: {previous_stats['strength']:,}\n"
-                f"Speed: {previous_stats['speed']:,}\n"
-                f"Defense: {previous_stats['defense']:,}\n"
-                f"Dexterity: {previous_stats['dexterity']:,}\n"
-                f"Total: {previous_stats['total']:,}\n\n"
-                f"Current Stats:\n"
-                f"Strength: {current_stats['strength']:,}\n"
-                f"Speed: {current_stats['speed']:,}\n"
-                f"Defense: {current_stats['defense']:,}\n"
-                f"Dexterity: {current_stats['dexterity']:,}\n"
-                f"Total: {total_current:,}\n\n"
-                f"Change in Stats:\n{change_in_stats}"
-                f"\nPercentage Change:\n{percentage_change}"
-                 f"Changes Since: {formatted_date}:\n"
+                f"Old Battle Stats ---> New Battle Stats\n"
+                f"Str: {previous_stats['strength']:,} ---> {current_stats['strength']:,}\n"
+                f"Spd: {previous_stats['speed']:,} ---> {current_stats['speed']:,}\n"
+                f"Dex: {previous_stats['dexterity']:,} ---> {current_stats['dexterity']:,}\n"
+                f"Def: {previous_stats['defense']:,} ---> {current_stats['defense']:,}\n"
+                f"Tot: {previous_stats['total']:,} ---> {total_current:,}\n\n"
+                f"Change in Stats:\n{change_in_stats}\n"
+                f"Percentage Change:\n{percentage_change}\n"
+                f"Changes Since: {formatted_date}:\n"
             )
 
             return stats_details
@@ -430,6 +429,7 @@ def get_user_stat_history(discord_id, discord_username, days_ago):
         
     except requests.exceptions.RequestException as e:
         return f"Error fetching data: {e}"
+
 
 def get_user_work_stats(discord_id):
     discord_id = str(discord_id)
