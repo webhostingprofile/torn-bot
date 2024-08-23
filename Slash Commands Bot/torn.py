@@ -398,15 +398,15 @@ def get_user_stat_history(discord_id, discord_username, days_ago):
                 'speed': personal_stats.get('speed', 0),
                 'defense': personal_stats.get('defense', 0),
                 'dexterity': personal_stats.get('dexterity', 0),
-                'total': personal_stats.get('totalstats', sum(personal_stats.values()))
+                'total': personal_stats.get('totalstats', 0)  # Use total from API
             }
-            total_previous = sum(previous_stats.values())
+            total_previous = previous_stats['total']  # Use the total from API
 
             # Calculate changes and percentage changes
             change_in_stats = {}
             percentage_change = {}
 
-            for stat in current_stats:
+            for stat in ['strength', 'speed', 'defense', 'dexterity']:
                 change_in_stats[stat] = current_stats[stat] - previous_stats[stat]
                 percentage_change[stat] = (change_in_stats[stat] / previous_stats[stat]) * 100 if previous_stats[stat] > 0 else 0
 
@@ -425,7 +425,6 @@ def get_user_stat_history(discord_id, discord_username, days_ago):
                 f"Dex: {previous_stats['dexterity']:,} ---> \n {current_stats['dexterity']:,} ({percentage_change['dexterity']:.2f}%)\n"
                 f"Def: {previous_stats['defense']:,} ---> \n {current_stats['defense']:,} ({percentage_change['defense']:.2f}%)\n"
                 f"Tot: {previous_stats['total']:,} ---> \n {total_current:,} ({percentage_change['total']:.2f}%)\n\n"
-                f"Change in Stats:\n{change_in_stats}\n"
                 f"Changes Since: {formatted_date}:\n"
                 f"percentage_change for testing {percentage_change}"
             )
@@ -436,7 +435,6 @@ def get_user_stat_history(discord_id, discord_username, days_ago):
         
     except requests.exceptions.RequestException as e:
         return f"Error fetching data: {e}"
-
 
 
 def get_user_work_stats(discord_id):
