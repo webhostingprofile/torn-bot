@@ -153,12 +153,13 @@ async def s(ctx, user: discord.User = None):
     # Create the embed
     embed = discord.Embed(
         description=user_stats,
-        color=discord.Color.blue()  # You can choose other colors
+        color=discord.Color.blue(),  # You can choose other colors
+        thumbnail=ctx.author.avatarURL(),
     )
 
-    # Set the user's profile picture as the thumbnail on the right hand side 
-    #embed.set_thumbnail(url=user.avatar_url)
-    embed.setImage(ctx.author.avatarURL())
+    # # Set the user's profile picture as the thumbnail on the right hand side 
+    # #embed.set_thumbnail(url=user.avatar_url)
+    # embed.setImage(ctx.author.avatarURL())
     # Send the embed
     await ctx.send(embed=embed)
 
