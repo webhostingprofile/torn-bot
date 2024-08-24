@@ -154,7 +154,7 @@ async def s(ctx, user: discord.User = None):
     embed = discord.Embed(
         description=user_stats,
         color=discord.Color.blue(),  # You can choose other colors
-        thumbnail=ctx.author.avatar_url,
+        #thumbnail=ctx.author.avatar_url,
         #title=ctx.author,
     )
 
