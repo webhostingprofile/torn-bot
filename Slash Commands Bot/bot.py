@@ -157,7 +157,7 @@ async def s(ctx, user: discord.User = None):
         #thumbnail=ctx.author.avatar_url,
         #title=ctx.author,
     )
-    embed.set_thumbnail(ctx.author.avatar.url)
+    embed.set_thumbnail(url=ctx.author.avatar.url)
     # # Set the user's profile picture as the thumbnail on the right hand side 
     # #embed.set_thumbnail(url=user.avatar_url)
     # embed.setImage(ctx.author.avatarURL())
