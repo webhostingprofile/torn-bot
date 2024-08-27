@@ -191,14 +191,22 @@ async def sh(ctx, days_ago: int):
     await ctx.send(embed=embed)
 
 @client.command(name="fs")
-async def fs(ctx):
-    user_effective_battle_stats = get_effective_battlestats(ctx.author.id, ctx.author.name)
+async def fs(ctx, user: discord.User = None):
+    if user is None: 
+        user_effective_battle_stats = get_effective_battlestats(ctx.author.id, ctx.author.name)
+    else: 
+        discord_id = user.id
+        discord_username = user.name
+        user_effective_battle_stats = get_effective_battlestats(discord_id, discord_username) 
+    #user_effective_battle_stats = get_effective_battlestats(ctx.author.id, ctx.author.name)
     # Create the embed
     embed = discord.Embed(
         #title=f"Stat History For {ctx.author.id}",
         description=user_effective_battle_stats,
         color=BLUE 
     )
+
+    embed.set_thumbnail(url=ctx.author.avatar.url)
 
     # Send the embed
     await ctx.send(embed=embed)
