@@ -566,14 +566,25 @@ def format_torn_profile(data):
     """
     return formatted_profile
 
-def get_vitals(discord_id):
+def get_vitals(discord_id, discord_username):
     discord_id = str(discord_id)
-    # Retrieve the Torn API key using the reusable function
-    user_info = get_user_torn_info(discord_id)
-    if 'error' in user_info:
-        return user_info['error']
+    db = get_firestore_db()  # Use the Firestore client from your database setup
+
+    # Fetch Torn API key and user timezone from Firestore
+    user_doc = db.collection('user_keys').document(discord_id).get()
+    if user_doc.exists:
+        user_data = user_doc.to_dict()
+        torn_api_key = user_data.get('torn_api_key')
+        user_timezone_str = user_data.get('time_zone')  # Assuming timezone is stored#
+        torn_id = user_data.get('torn_id')
+    else:
+        return "User data not found."
+
+    if not torn_api_key:
+        return "Torn API key not found for the user."
     
-    torn_api_key = user_info['torn_api_key']
+    if not user_timezone_str:
+        return "User timezone not set. Please set your timezone using !timezone command."
 
     # Use the retrieved API key in the request URL
     url = f'https://api.torn.com/user/?selections=profile,properties,personalstats,cooldowns,bars,education&key={torn_api_key}'
@@ -583,7 +594,9 @@ def get_vitals(discord_id):
         if response.status_code == 200:
             user_data = response.json()
             print("user vitals data ", user_data)
-            vitals_formatted = format_vitals(user_data)
+            link_text = f"Vitals for {discord_username}"
+            profile_link = get_user_profile_link(torn_id, link_text)
+            vitals_formatted = format_vitals(user_data, profile_link)
             return vitals_formatted
         else:
             return f"Error fetching data: {response.status_code}"
@@ -591,9 +604,10 @@ def get_vitals(discord_id):
         return f"Error fetching data: {e}"
 
 
-def format_vitals(data):
+def format_vitals(data, profile_link):
     # Extracting and formatting the necessary details
     vitals = {
+        f"{profile_link}:\n\n"
         'life': f"{data['life']['current']}/{data['life']['maximum']}",
         'energy': f"{data['energy']['current']}/{data['energy']['maximum']}",
         'happiness': f"{data['happy']['current']}/{data['happy']['maximum']}",

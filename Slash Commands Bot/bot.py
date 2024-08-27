@@ -135,6 +135,7 @@ async def user(ctx):
         description=user_details,
         color=BLUE 
     )
+    embed.set_thumbnail(url=ctx.author.avatar.url)
     # Send the embed
     await ctx.send(embed=embed)
     #await ctx.send(user_details)
@@ -174,6 +175,7 @@ async def sp(ctx):
         description=user_stats_as_percentage,
         color=BLUE 
     )
+    embed.set_thumbnail(url=ctx.author.avatar.url)
     # Send the embed
     await ctx.send(embed=embed)
 
@@ -187,6 +189,7 @@ async def sh(ctx, days_ago: int):
         description=stat_history,
         color=BLUE 
     )
+    embed.set_thumbnail(url=ctx.author.avatar.url)
     # Send the embed
     await ctx.send(embed=embed)
 
@@ -219,18 +222,20 @@ async def p(ctx):
         description=user_profile,
         color=BLUE 
     )
+    embed.set_thumbnail(url=ctx.author.avatar.url)
     # Send the embed
     await ctx.send(embed=embed)
 
 @client.command(name="v")
 async def v(ctx):
-    user_vitals =  get_vitals(discord_id=ctx.author.id)
+    user_vitals =  get_vitals(discord_id=ctx.author.id, discord_username=ctx.author.name)
     # Create the embed
     embed = discord.Embed(
         #title=f"Stat History For {ctx.author.id}",
         description=user_vitals,
         color=BLUE 
     )
+    embed.set_thumbnail(url=ctx.author.avatar.url)
     # Send the embed
     await ctx.send(embed=embed)
 
