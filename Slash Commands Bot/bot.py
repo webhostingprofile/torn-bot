@@ -228,7 +228,7 @@ async def p(ctx):
 
 @client.command(name="v")
 async def v(ctx):
-    user_vitals =  get_vitals(discord_id=ctx.author.id, discord_username=ctx.author.name)
+    user_vitals =  get_vitals(discord_id=ctx.author.id)#, discord_username=ctx.author.name)
     # Create the embed
     embed = discord.Embed(
         #title=f"Stat History For {ctx.author.id}",
