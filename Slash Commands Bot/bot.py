@@ -248,6 +248,7 @@ async def eta(ctx):
         description=user_eta,
         color=BLUE 
     )
+    embed.set_thumbnail(url=ctx.author.avatar.url)
     # Send the embed
     await ctx.send(embed=embed)
 
@@ -260,6 +261,7 @@ async def ws(ctx):
         description=user_ws,
         color=BLUE 
     )
+    embed.set_thumbnail(url=ctx.author.avatar.url)
     # Send the embed
     await ctx.send(embed=embed)
 @client.hybrid_command(name='sync')
