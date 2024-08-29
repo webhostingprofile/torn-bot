@@ -595,8 +595,8 @@ def get_vitals(discord_id, discord_username):
             user_data = response.json()
             print("user vitals data ", user_data)
             link_text = f"Vitals for {discord_username}"
-            #profile_link = get_user_profile_link(torn_id, link_text)
-            vitals_formatted = format_vitals(user_data)
+            profile_link = get_user_profile_link(torn_id, link_text)
+            vitals_formatted = format_vitals(user_data, profile_link)
             return vitals_formatted
         else:
             return f"Error fetching data: {response.status_code}"
@@ -604,10 +604,10 @@ def get_vitals(discord_id, discord_username):
         return f"Error fetching data: {e}"
 
 
-def format_vitals(data):
+def format_vitals(data, profile_link):
     # Extracting and formatting the necessary details
     vitals = {
-        #f"{profile_link}:\n\n"
+        f"{profile_link}:\n\n"
         'life': f"{data['life']['current']}/{data['life']['maximum']}",
         'energy': f"{data['energy']['current']}/{data['energy']['maximum']}",
         'happiness': f"{data['happy']['current']}/{data['happy']['maximum']}",
