@@ -613,7 +613,7 @@ def get_vitals(discord_id, discord_username):
 def format_vitals(data, profile_link):
     # Extracting and formatting the necessary details
     vitals = {
-        f"{profile_link}:\n\n"
+        #f"{profile_link}:\n\n"
         'life': f"{data['life']['current']}/{data['life']['maximum']}",
         'energy': f"{data['energy']['current']}/{data['energy']['maximum']}",
         'happiness': f"{data['happy']['current']}/{data['happy']['maximum']}",
