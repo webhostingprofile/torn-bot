@@ -210,13 +210,19 @@ def get_user_stats(discord_id, discord_username):
                 )
             else:
                 user_details = (
-                    #f"{profile_link}:\n\n"
+                    f"{profile_link}:\n\n"
                     f"Old Battle Stats ---> New Battle Stats\n"
-                    f"Str: {previous_stats.get('strength', 0):,}\n"
-                    f"Spd: {previous_stats.get('speed', 0):,}\n"
-                    f"Dex: {previous_stats.get('dexterity', 0):,}\n"
-                    f"Def: {previous_stats.get('defense', 0):,} \n\n"
-                    f"Tot: {previous_stats['total']:,}\n\n"
+                    f"Str: {current_stats.get('strength', 0):,}\n"
+                    f"Spd: {current_stats.get('speed', 0):,}\n"
+                    f"Dex: {current_stats.get('dexterity', 0):,}\n"
+                    f"Def: {current_stats.get('defense', 0):,} \n\n"
+                    f"Tot: {current_stats['total']:,}\n\n"
+                    # f"Old Battle Stats ---> New Battle Stats\n"
+                    # f"Str: {previous_stats.get('strength', 0):,}\n"
+                    # f"Spd: {previous_stats.get('speed', 0):,}\n"
+                    # f"Dex: {previous_stats.get('dexterity', 0):,}\n"
+                    # f"Def: {previous_stats.get('defense', 0):,} \n\n"
+                    # f"Tot: {previous_stats['total']:,}\n\n"
                 )
             
             # Store the new stats in Firestore
