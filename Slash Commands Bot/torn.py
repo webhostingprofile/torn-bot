@@ -216,7 +216,7 @@ def get_user_stats(discord_id, discord_username):
                     f"Spd: {current_stats.get('speed', 0):,}\n"
                     f"Dex: {current_stats.get('dexterity', 0):,}\n"
                     f"Def: {current_stats.get('defense', 0):,} \n\n"
-                    f"Tot: {current_stats['total']:,}\n\n"
+                    f"Tot: {total:,}\n\n"
                     # f"Old Battle Stats ---> New Battle Stats\n"
                     # f"Str: {previous_stats.get('strength', 0):,}\n"
                     # f"Spd: {previous_stats.get('speed', 0):,}\n"
