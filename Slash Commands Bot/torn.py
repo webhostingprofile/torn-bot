@@ -210,7 +210,7 @@ def get_user_stats(discord_id, discord_username):
                 )
             else:
                 user_details = (
-                    f"{profile_link}:\n\n"
+                    #f"{profile_link}:\n\n"
                     f"Old Battle Stats ---> New Battle Stats\n"
                     f"Str: {previous_stats.get('strength', 0):,}\n"
                     f"Spd: {previous_stats.get('speed', 0):,}\n"
