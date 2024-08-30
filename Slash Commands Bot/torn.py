@@ -636,16 +636,19 @@ def format_vitals(data, profile_link):
             return f"{days}d {hours}h {minutes}m" if days else f"{hours}h {minutes}m"
 
     formatted_vitals = f"""
-    #f"{profile_link}:\n\n"
+    {profile_link}:\n\n
 
     Life
     {vitals['life']}
+    Full in {format_time(vitals['life_full'])}
 
     Energy
     {vitals['energy']}
+    Full in {format_time(vitals['energy_full'])}
 
     Happiness
     {vitals['happiness']}
+    Full in {format_time(vitals['happiness_full'])}
 
     Nerve
     {vitals['nerve']}
