@@ -615,8 +615,11 @@ def format_vitals(data, profile_link):
     vitals = {
         #f"{profile_link}:\n\n"
         'life': f"{data['life']['current']}/{data['life']['maximum']}",
+        'life_full': data['life']['fulltime'],
         'energy': f"{data['energy']['current']}/{data['energy']['maximum']}",
+        'energy_full': data['energy']['fulltime'],
         'happiness': f"{data['happy']['current']}/{data['happy']['maximum']}",
+        'happiness_full': data['happy']['fulltime'],
         'nerve': f"{data['nerve']['current']}/{data['nerve']['maximum']}",
         'nerve_full': data['nerve']['fulltime'],
         'medical_cooldown': data['cooldowns']['medical'],
