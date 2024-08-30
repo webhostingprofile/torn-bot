@@ -636,7 +636,7 @@ def format_vitals(data, profile_link):
             return f"{days}d {hours}h {minutes}m" if days else f"{hours}h {minutes}m"
 
     formatted_vitals = f"""
-    Vitals for {data['name']}[{data['player_id']}]
+    #f"{profile_link}:\n\n"
 
     Life
     {vitals['life']}
