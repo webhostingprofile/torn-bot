@@ -299,3 +299,99 @@ if __name__ == "__main__":
         client.run(TOKEN)
     except Exception as e:
         print(f"Failed to start Discord client: {e}")
+
+
+# Global dictionary to store lotto data
+lotto_data = {
+    "participants": {},  # Format: {discord_id: ticket_count}
+    "jackpot": 0,
+    "start_time": time.time(),
+    "end_time": time.time() + 86400  # Example: 24 hours from start
+}
+
+TICKET_PRICE = 1000  # Example ticket price
+
+@client.command(name="lotto")
+async def lotto(ctx, action: str, tickets: int = 1):
+    discord_id = ctx.author.id
+    username = ctx.author.name
+
+    if action == "buy":
+        if tickets < 1:
+            await ctx.send("You need to buy at least 1 ticket!")
+            return
+
+        # Deduct currency (integration with user currency system needed)
+        ticket_cost = tickets * TICKET_PRICE
+
+        # Check if user exists in participants and update
+        if discord_id in lotto_data["participants"]:
+            lotto_data["participants"][discord_id] += tickets
+        else:
+            lotto_data["participants"][discord_id] = tickets
+
+        lotto_data["jackpot"] += ticket_cost
+
+        await ctx.send(f"{username} bought {tickets} tickets for {ticket_cost}! Current jackpot: {lotto_data['jackpot']}")
+
+
+@client.command(name="lottostatus")
+async def lottostatus(ctx):
+    participants = lotto_data["participants"]
+    jackpot = lotto_data["jackpot"]
+
+    if not participants:
+        await ctx.send("No participants yet!")
+        return
+
+    participant_list = "\n".join([f"<@{user}>: {count} tickets" for user, count in participants.items()])
+    await ctx.send(f"**Current Lotto Status:**\nJackpot: {jackpot}\nParticipants:\n{participant_list}")
+
+
+import random
+
+@client.command(name="lottodraw")
+@commands.has_permissions(administrator=True)  # Restrict to admins
+async def lottodraw(ctx):
+    participants = lotto_data["participants"]
+    jackpot = lotto_data["jackpot"]
+
+    if not participants:
+        await ctx.send("No participants to draw from!")
+        return
+
+    # Create a weighted list of tickets
+    weighted_pool = [user for user, tickets in participants.items() for _ in range(tickets)]
+    winner = random.choice(weighted_pool)
+
+    await ctx.send(f"🎉 Congratulations <@{winner}>! You won the jackpot of {jackpot} 🎉")
+
+    # Reset lotto
+    lotto_data["participants"] = {}
+    lotto_data["jackpot"] = 0
+
+
+@tasks.loop(hours=24)  # Draw every 24 hours
+async def auto_draw():
+    channel = client.get_channel(YOUR_CHANNEL_ID)  # Replace with your channel ID
+    participants = lotto_data["participants"]
+    jackpot = lotto_data["jackpot"]
+
+    if not participants:
+        await channel.send("No participants this round. Better luck next time!")
+        return
+
+    # Weighted draw
+    weighted_pool = [user for user, tickets in participants.items() for _ in range(tickets)]
+    winner = random.choice(weighted_pool)
+
+    await channel.send(f"🎉 Congratulations <@{winner}>! You won the jackpot of {jackpot} 🎉")
+
+    # Reset lotto
+    lotto_data["participants"] = {}
+    lotto_data["jackpot"] = 0
+
+# Start the task when the bot is ready
+@client.event
+async def on_ready():
+    auto_draw.start()
