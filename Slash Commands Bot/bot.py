@@ -264,44 +264,9 @@ async def ws(ctx):
     embed.set_thumbnail(url=ctx.author.avatar.url)
     # Send the embed
     await ctx.send(embed=embed)
-@client.hybrid_command(name='sync')
-async def sync(ctx: commands.Context):
-    await ctx.send("Syncing...")
-    await client.tree.sync()
-
-# Function to run Flask server
-def run_flask():
-    app.run(host='0.0.0.0', port=8080)
-
-# Function to keep the server alive
-def keep_alive():
-    while True:
-        try:
-            requests.get("http://localhost:8080")
-        except requests.exceptions.RequestException as e:
-            print(f"Keep-alive request failed: {e}")
-        time.sleep(5 * 60)  # Ping every 5 minutes
-
-# Run Flask server in a separate thread
-if __name__ == "__main__":
-    # Start the Flask server in a background thread
-    print("Trying to run the bot")
-    flask_thread = threading.Thread(target=run_flask)
-    flask_thread.start()
-
-    # Start the keep-alive function in a background thread
-    keep_alive_thread = threading.Thread(target=keep_alive)
-    keep_alive_thread.daemon = True  # Daemon thread will exit when the main thread exits
-    keep_alive_thread.start()
-
-    try:
-        # Start the Discord bot
-        client.run(TOKEN)
-    except Exception as e:
-        print(f"Failed to start Discord client: {e}")
 
 
-# Global dictionary to store lotto data
+    # Global dictionary to store lotto data
 lotto_data = {
     "participants": {},  # Format: {discord_id: ticket_count}
     "jackpot": 0,
@@ -395,3 +360,41 @@ async def auto_draw():
 @client.event
 async def on_ready():
     auto_draw.start()
+@client.hybrid_command(name='sync')
+async def sync(ctx: commands.Context):
+    await ctx.send("Syncing...")
+    await client.tree.sync()
+
+# Function to run Flask server
+def run_flask():
+    app.run(host='0.0.0.0', port=8080)
+
+# Function to keep the server alive
+def keep_alive():
+    while True:
+        try:
+            requests.get("http://localhost:8080")
+        except requests.exceptions.RequestException as e:
+            print(f"Keep-alive request failed: {e}")
+        time.sleep(5 * 60)  # Ping every 5 minutes
+
+# Run Flask server in a separate thread
+if __name__ == "__main__":
+    # Start the Flask server in a background thread
+    print("Trying to run the bot")
+    flask_thread = threading.Thread(target=run_flask)
+    flask_thread.start()
+
+    # Start the keep-alive function in a background thread
+    keep_alive_thread = threading.Thread(target=keep_alive)
+    keep_alive_thread.daemon = True  # Daemon thread will exit when the main thread exits
+    keep_alive_thread.start()
+
+    try:
+        # Start the Discord bot
+        client.run(TOKEN)
+    except Exception as e:
+        print(f"Failed to start Discord client: {e}")
+
+
+
