@@ -357,9 +357,9 @@ async def lottodraw(ctx):
 #     lotto_data["jackpot"] = 0
 
 # Start the task when the bot is ready
-@client.event
-async def on_ready():
-    auto_draw.start()
+# @client.event
+# async def on_ready():
+#     auto_draw.start()
 @client.hybrid_command(name='sync')
 async def sync(ctx: commands.Context):
     await ctx.send("Syncing...")
