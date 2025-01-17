@@ -2,12 +2,14 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import os
 from dotenv import load_dotenv
+import requests
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Path to your service account key
 SERVICE_ACCOUNT_KEY = os.getenv('SERVICE_ACCOUNT_KEY')
+TOKEN = os.getenv('torn_api_key')
 # Create a dictionary with the environment variables
 firebase_credentials = {
     "type": os.getenv("FIREBASE_TYPE"),
@@ -51,6 +53,26 @@ def fetch_user_key(discord_id):
         return doc.to_dict()
     else:
         return None
+    
+def fetch_torn_items():
+    """Fetch items data from Torn API."""
+    url = f"https://api.torn.com/torn/?selections=items&key={TOKEN}&"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json().get("items", {})
+    else:
+        raise Exception(f"Error fetching items from Torn API: {response.status_code}, {response.text}")
+
+
+def store_items_in_firestore(items):
+    """Store items data in Firestore."""
+    collection_ref = db.collection("torn_items")
+    for item_id, item_data in items.items():
+        # Add each item to Firestore with its item ID as the document ID
+        doc_ref = collection_ref.document(str(item_id))
+        doc_ref.set(item_data)
+    print(f"Successfully stored {len(items)} items in Firestore!")
+
 
 def test_insert_data():
     doc_ref = db.collection('user_stats').document('discord_user_id')
@@ -76,3 +98,11 @@ if __name__ == "__main__":
 
     # Test inserting dummy data
     test_insert_data()
+
+    try:
+        # Fetch items data from Torn API
+        items = fetch_torn_items()
+        # Store items data in Firestore
+        store_items_in_firestore(items)
+    except Exception as e:
+        print(f"Error occurred: {e}")
