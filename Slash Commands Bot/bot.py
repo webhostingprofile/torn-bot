@@ -336,25 +336,25 @@ async def lottodraw(ctx):
     lotto_data["jackpot"] = 0
 
 
-@tasks.loop(hours=24)  # Draw every 24 hours
-async def auto_draw():
-    channel = client.get_channel(YOUR_CHANNEL_ID)  # Replace with your channel ID
-    participants = lotto_data["participants"]
-    jackpot = lotto_data["jackpot"]
+# @tasks.loop(hours=24)  # Draw every 24 hours
+# async def auto_draw():
+#     channel = client.get_channel(YOUR_CHANNEL_ID)  # Replace with your channel ID
+#     participants = lotto_data["participants"]
+#     jackpot = lotto_data["jackpot"]
 
-    if not participants:
-        await channel.send("No participants this round. Better luck next time!")
-        return
+#     if not participants:
+#         await channel.send("No participants this round. Better luck next time!")
+#         return
 
-    # Weighted draw
-    weighted_pool = [user for user, tickets in participants.items() for _ in range(tickets)]
-    winner = random.choice(weighted_pool)
+#     # Weighted draw
+#     weighted_pool = [user for user, tickets in participants.items() for _ in range(tickets)]
+#     winner = random.choice(weighted_pool)
 
-    await channel.send(f"🎉 Congratulations <@{winner}>! You won the jackpot of {jackpot} 🎉")
+#     await channel.send(f"🎉 Congratulations <@{winner}>! You won the jackpot of {jackpot} 🎉")
 
-    # Reset lotto
-    lotto_data["participants"] = {}
-    lotto_data["jackpot"] = 0
+#     # Reset lotto
+#     lotto_data["participants"] = {}
+#     lotto_data["jackpot"] = 0
 
 # Start the task when the bot is ready
 @client.event
