@@ -14,6 +14,7 @@ import bot
 import pytz
 from timezone import TimezoneView
 from lotto_view import LottoView
+from lotto_manager import get_lotto_data, set_lotto_data, reset_lotto_data
 
 
 # Define a list of UTC offsets from -12 to +14
@@ -363,21 +364,35 @@ async def lottodraw(ctx):
 # async def on_ready():
 #     auto_draw.start()
 
-@client.command(name="sl")
-async def sl(ctx, name):
+# Command to start a lotto
+@commands.command(name="sl")
+async def start_lotto(ctx):
+    lotto_data = get_lotto_data()
+
+    # Check if a lotto is already active
+    if lotto_data["is_active"]:
+        await ctx.send("A lotto is already active! Finish it before starting a new one.")
+        return
+
+    # Initialize the lotto
+    reset_lotto_data()
+    set_lotto_data("is_active", True)
+    set_lotto_data("creator", ctx.author.name)
+    set_lotto_data("start_time", time.time())
+    set_lotto_data("end_time", time.time() + 86400)
+
     embed = discord.Embed(
         title="Lotto Time!",
         description=(
             "Click the button below to join the lotto and stand a chance to win the jackpot!\n\n"
-            f"🎟 !j and !join to join lotto\n"
-            f"@lotto {ctx.author.name} started a lotto for {name}"
+            "Use `!j` to join.\n"
         ),
         color=discord.Color.green()
     )
+    embed.set_footer(text=f"Lotto started by {ctx.author.name}")
 
-    # Add the Lotto View with the Join Button
-    await ctx.send(embed=embed, view=LottoView())
-
+    # Pass lotto_data to LottoView
+    await ctx.send(embed=embed, view=LottoView(lotto_data))
 # Command to join the lotto
 @client.command(name="j")
 async def join_lotto(ctx):
