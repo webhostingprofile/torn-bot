@@ -366,7 +366,7 @@ async def lottodraw(ctx):
 
 # Command to start a lotto
 @commands.command(name="sl")
-async def start_lotto(ctx):
+async def sl(ctx):
     lotto_data = get_lotto_data()
 
     # Check if a lotto is already active
