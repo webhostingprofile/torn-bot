@@ -1,4 +1,5 @@
 from discord.ui import Button, View
+import discord
 
 # Define a new view with a Join Button
 class LottoView(View):
