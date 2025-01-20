@@ -365,7 +365,7 @@ async def lottodraw(ctx):
 #     auto_draw.start()
 
 # Command to start a lotto
-@commands.command(name="sl")
+@client.command(name="sl")
 async def sl(ctx, name):
     lotto_data = get_lotto_data()
 
