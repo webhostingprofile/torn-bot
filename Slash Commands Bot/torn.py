@@ -803,7 +803,7 @@ def get_effective_battlestats(discord_id, discord_username):
 
 
 # Logic functions
-def join_lotto_logic(discord_id, discord_username, lotto_data, ticket_price):
+def join_lotto_logic(discord_id, discord_username, lotto_data):
     """
     Adds a user to the lotto and increments the jackpot.
     """
@@ -812,11 +812,11 @@ def join_lotto_logic(discord_id, discord_username, lotto_data, ticket_price):
     else:
         lotto_data["participants"][discord_id] = 1
 
-    lotto_data["jackpot"] += ticket_price  # Increment jackpot
+    
 
     return (
-        f"{username} has joined the lotto! Total tickets: {lotto_data['participants'][discord_id]} | "
-        f"Current jackpot: {lotto_data['jackpot']} coins."
+        f"{discord_username} has joined the lotto! Total tickets: {lotto_data['participants'][discord_id]} | "
+        
     )
 
 
@@ -836,6 +836,8 @@ def get_lotto_status_logic(lotto_data, guild):
         "**Participants:**\n" + participant_list
     )
     return None, description
+
+# Command handlers
 
 
 lotto_data = {

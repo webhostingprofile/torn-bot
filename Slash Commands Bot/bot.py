@@ -370,13 +370,62 @@ async def sl(ctx, name):
         description=(
             "Click the button below to join the lotto and stand a chance to win the jackpot!\n\n"
             f"🎟 !j and !join to join lotto\n"
-            f"@lotto {discord.User} started a lotto for {name}"
+            f"@lotto {ctx.author.name} started a lotto for {name}"
         ),
         color=discord.Color.green()
     )
 
     # Add the Lotto View with the Join Button
     await ctx.send(embed=embed, view=LottoView())
+
+# Command to join the lotto
+@client.command(name="j")
+async def join_lotto(ctx):
+    global active_lotto, lotto_participants
+
+    # Check if a lotto is active
+    if not active_lotto:
+        await ctx.send("No active lotto! Start one using `!sl`.")
+        return
+
+    # Check if user is already a participant
+    if ctx.author.id in [participant["id"] for participant in lotto_participants]:
+        await ctx.send(f"{ctx.author.name}, you have already joined the lotto!")
+        return
+
+    # Add user to participants
+    lotto_participants.append({"id": ctx.author.id, "name": ctx.author.name})
+    active_lotto["jackpot"] += 10  # Increment jackpot (optional)
+
+    await ctx.send(f"{ctx.author.name} has joined the lotto! Total participants: {len(lotto_participants)}.")
+
+
+# Command to check lotto status
+@client.command(name="status")
+async def lotto_status(ctx):
+    global active_lotto, lotto_participants
+
+    # Check if a lotto is active
+    if not active_lotto:
+        await ctx.send("No active lotto!")
+        return
+
+    # Generate participant list
+    participant_list = "\n".join([participant["name"] for participant in lotto_participants])
+    if not participant_list:
+        participant_list = "No participants yet."
+
+    embed = discord.Embed(
+        title="Lotto Status",
+        description=(
+            f"💰 **Jackpot**: {active_lotto['jackpot']} coins\n"
+            f"👑 **Started by**: {active_lotto['creator']}\n\n"
+            "**Participants:**\n" + participant_list
+        ),
+        color=discord.Color.blue()
+    )
+    await ctx.send(embed=embed)
+
 
 
     # Add the Lotto View with the Join Button
