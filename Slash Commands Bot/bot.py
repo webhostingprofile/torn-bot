@@ -366,7 +366,7 @@ async def lottodraw(ctx):
 
 # Command to start a lotto
 @commands.command(name="sl")
-async def sl(ctx):
+async def sl(ctx, name):
     lotto_data = get_lotto_data()
 
     # Check if a lotto is already active
@@ -385,7 +385,8 @@ async def sl(ctx):
         title="Lotto Time!",
         description=(
             "Click the button below to join the lotto and stand a chance to win the jackpot!\n\n"
-            "Use `!j` to join.\n"
+            f"🎟 !j and !join to join lotto\n"
+            f"@lotto {ctx.author.name} started a lotto for {name}\n"
         ),
         color=discord.Color.green()
     )
