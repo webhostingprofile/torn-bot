@@ -8,11 +8,13 @@ from flask import Flask
 import threading
 import requests
 import time
-from torn import get_user_details, get_user_stats, get_user_profile, get_vitals, get_eta, get_user_stat_history, get_user_work_stats, get_effective_battlestats, get_mentioned_user_stats, get_user_stats_as_percentage
+from torn import get_user_details, get_user_stats, get_user_profile, get_vitals, get_eta, get_user_stat_history, get_user_work_stats, get_effective_battlestats, get_mentioned_user_stats, get_user_stats_as_percentage, join_lotto_logic, get_lotto_status_logic
 from database import insert_user_key, get_firestore_db
 import bot
 import pytz
 from timezone import TimezoneView
+from lotto_view import LottoView
+
 
 # Define a list of UTC offsets from -12 to +14
 UTC_OFFSETS = [f"TCT{n:+}" for n in range(-12, 15)]
@@ -360,6 +362,24 @@ async def lottodraw(ctx):
 # @client.event
 # async def on_ready():
 #     auto_draw.start()
+
+@client.command(name="sl")
+async def sl(ctx, name):
+    embed = discord.Embed(
+        title="Lotto Time!",
+        description=(
+            "Click the button below to join the lotto and stand a chance to win the jackpot!\n\n"
+            f"🎟 !j and !join to join lotto\n"
+            f"@lotto {discord.User} started a lotto for {name}"
+        ),
+        color=discord.Color.green()
+    )
+
+    # Add the Lotto View with the Join Button
+    await ctx.send(embed=embed, view=LottoView())
+
+
+    # Add the Lotto View with the Join Button
 @client.hybrid_command(name='sync')
 async def sync(ctx: commands.Context):
     await ctx.send("Syncing...")

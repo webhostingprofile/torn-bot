@@ -6,6 +6,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 from database import get_firestore_db
 import pytz
+import time
 
 load_dotenv()
 TOKEN = os.getenv('torn_api_key')
@@ -801,6 +802,50 @@ def get_effective_battlestats(discord_id, discord_username):
 
 
 
+# Logic functions
+def join_lotto_logic(discord_id, discord_username, lotto_data, ticket_price):
+    """
+    Adds a user to the lotto and increments the jackpot.
+    """
+    if discord_id in lotto_data["participants"]:
+        lotto_data["participants"][discord_id] += 1
+    else:
+        lotto_data["participants"][discord_id] = 1
+
+    lotto_data["jackpot"] += ticket_price  # Increment jackpot
+
+    return (
+        f"{username} has joined the lotto! Total tickets: {lotto_data['participants'][discord_id]} | "
+        f"Current jackpot: {lotto_data['jackpot']} coins."
+    )
+
+
+def get_lotto_status_logic(lotto_data, guild):
+    """
+    Returns the current status of the lotto.
+    """
+    participants = lotto_data["participants"]
+    if not participants:
+        return "No one has joined the lotto yet!", None
+
+    participant_list = "\n".join(
+        [f"{guild.get_member(uid).name}: {tickets} tickets" for uid, tickets in participants.items()]
+    )
+    description = (
+        f"💰 Current Jackpot: {lotto_data['jackpot']} coins\n\n"
+        "**Participants:**\n" + participant_list
+    )
+    return None, description
+
+
+lotto_data = {
+    "participants": {},  # Format: {discord_id: ticket_count}
+    "jackpot": 0,
+    "start_time": time.time(),
+    "end_time": time.time() + 86400  # Example: 24 hours from start
+}
+
+TICKET_PRICE = 1000  # Example ticket price
 
 def run_torn_commands():
     get_user_details()
