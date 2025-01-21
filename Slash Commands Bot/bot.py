@@ -14,7 +14,7 @@ import bot
 import pytz
 from timezone import TimezoneView
 from lotto_view import LottoView
-from lotto_manager import get_lotto_data, set_lotto_data, reset_lotto_data, handle_join_lotto_data
+from lotto_manager import get_lotto_data, set_lotto_data, reset_lotto_data, handle_join_lotto
 import asyncio 
 
 # Define a list of UTC offsets from -12 to +14
