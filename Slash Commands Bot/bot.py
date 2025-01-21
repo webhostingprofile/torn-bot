@@ -441,7 +441,7 @@ async def countdown(ctx):
         # Notify when countdown ends
     await ctx.send("🎉 The lotto is being drawn now! 🎉")
     await draw_lotto(ctx)
-    reset_lotto_data(ctx)
+    reset_lotto_data()
 
 
 # Function to draw the lotto winner
@@ -459,6 +459,7 @@ async def draw_lotto(ctx):
     winner = ctx.guild.get_member(winner_id)  # Fetch the Discord member object
 
     if winner is None:
+        await ctx.send("test info {winner_id} & {winner}")
         await ctx.send("The winner could not be found in this server! 😅")
         return
 
