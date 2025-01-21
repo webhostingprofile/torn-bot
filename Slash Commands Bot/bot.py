@@ -466,7 +466,7 @@ async def draw_lotto(ctx):
         return
 
     await ctx.send(f"test info {winner_id} & {winner}")
-    await ctx.send(f"🎉 Congratulations <@{winner}>! You have won the jackpot of {lotto_data['jackpot']} coins! 🎉")
+    await ctx.send(f"🎉 Congratulations {winner_id.mention}! You have won the jackpot of {lotto_data['jackpot']} coins! 🎉")
 
     # await ctx.send(f"🎉 Congratulations {winner.mention}! You have won the jackpot of {lotto_data['jackpot']} coins! 🎉")
 
