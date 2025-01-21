@@ -397,11 +397,11 @@ async def sl(ctx, name):
 # Command to join the lotto
 @client.command(name="j")
 async def join_lotto(ctx):
-    await handle_join_lotto_data(ctx)
+    await handle_join_lotto(ctx)
 
 @client.command(name="join")
 async def join_lotto_alias(ctx):
-    await handle_join_lotto_data(ctx)
+    await handle_join_lotto(ctx)
 
 # Command to check lotto status
 @client.command(name="status")
