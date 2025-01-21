@@ -451,6 +451,7 @@ async def draw_lotto(ctx):
         return 
     
     # pick a random winner 
+    lotto_data = get_lotto_data()
     winner_id = random.choice(lotto_data["participants"])
     winner = ctx.guild.get_member(winner_id) # Get the discord member object 
         # Announce the winner
