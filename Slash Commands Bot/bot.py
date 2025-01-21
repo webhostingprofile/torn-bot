@@ -441,6 +441,7 @@ async def countdown(ctx):
         # Notify when countdown ends
     await ctx.send("🎉 The lotto is being drawn now! 🎉")
     await draw_lotto(ctx)
+    reset_lotto_data(ctx)
 
 
 # Function to draw the lotto winner
