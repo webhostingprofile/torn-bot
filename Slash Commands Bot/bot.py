@@ -446,8 +446,9 @@ async def countdown(ctx):
 
 # Function to draw the lotto winner
 async def draw_lotto(ctx):
-    print("lotto data", lotto_data)
+    
     lotto_data = get_lotto_data()
+    print("lotto data", lotto_data)
     # Check if participants joined the lotto
     if not lotto_data["participants"]:
         await ctx.send("No participants joined the lotto!")
