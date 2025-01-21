@@ -32,3 +32,4 @@ class LottoView(View):
             f"{interaction.user.name} has joined the lotto! Total participants: {len(participants)}.",
             ephemeral=False
         )
+    

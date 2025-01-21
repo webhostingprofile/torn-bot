@@ -14,8 +14,8 @@ import bot
 import pytz
 from timezone import TimezoneView
 from lotto_view import LottoView
-from lotto_manager import get_lotto_data, set_lotto_data, reset_lotto_data
-
+from lotto_manager import get_lotto_data, set_lotto_data, reset_lotto_data, handle_join_lotto_data
+import asyncio 
 
 # Define a list of UTC offsets from -12 to +14
 UTC_OFFSETS = [f"TCT{n:+}" for n in range(-12, 15)]
@@ -397,24 +397,11 @@ async def sl(ctx, name):
 # Command to join the lotto
 @client.command(name="j")
 async def join_lotto(ctx):
-    global active_lotto, lotto_participants
+    await handle_join_lotto_data(ctx)
 
-    # Check if a lotto is active
-    if not active_lotto:
-        await ctx.send("No active lotto! Start one using `!sl`.")
-        return
-
-    # Check if user is already a participant
-    if ctx.author.id in [participant["id"] for participant in lotto_participants]:
-        await ctx.send(f"{ctx.author.name}, you have already joined the lotto!")
-        return
-
-    # Add user to participants
-    lotto_participants.append({"id": ctx.author.id, "name": ctx.author.name})
-    active_lotto["jackpot"] += 10  # Increment jackpot (optional)
-
-    await ctx.send(f"{ctx.author.name} has joined the lotto! Total participants: {len(lotto_participants)}.")
-
+@client.command(name="join")
+async def join_lotto_alias(ctx):
+    await handle_join_lotto_data(ctx)
 
 # Command to check lotto status
 @client.command(name="status")
@@ -441,6 +428,36 @@ async def lotto_status(ctx):
         color=discord.Color.blue()
     )
     await ctx.send(embed=embed)
+
+@client.command(name="cd")
+async def countdown(ctx):
+    countdown_time = 15 # set the countdown duration in seconds
+
+    # send the countdown messages
+    for remaining in range(countdown_time, 0, -1):
+        await ctx.send(f"⏳ The lotto will be drawn in {remaining} seconds ⏳")
+        await asyncio.sleep(1)  # Wait for 1 second
+
+        # Notify when countdown ends
+    await ctx.send("🎉 The lotto is being drawn now! 🎉")
+    await draw_lotto(ctx)
+
+
+# Function to draw the lotto winner
+async def draw_lotto(ctx):
+    if not lotto_data["participants"]:
+        await ctx.send("No participants joined the lotto!")
+        return 
+    
+    # pick a random winner 
+    winner_id = random.choice(lotto_data["participants"])
+    winner = ctx.guild.get_member(winner_id) # Get the discord member object 
+        # Announce the winner
+    await ctx.send(f"🎉 Congratulations {winner.mention}! You have won the jackpot of {lotto_data['jackpot']} coins! 🎉")
+
+    # Reset lotto data for the next round
+    lotto_data["participants"] = []
+    lotto_data["jackpot"] = 0
 
 
 
