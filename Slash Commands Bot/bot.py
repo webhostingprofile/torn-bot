@@ -460,7 +460,7 @@ async def draw_lotto(ctx):
 
     if winner is None:
         await ctx.send(f"test info {winner_id} & {winner}")
-        await ctx.send(f"more test info {lotto_data["participants"]}")
+        await ctx.send(f"more test info {lotto_data['participants']}")
         await ctx.send("The winner could not be found in this server! 😅")
         return
 
