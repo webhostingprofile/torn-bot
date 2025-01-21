@@ -451,19 +451,22 @@ async def draw_lotto(ctx):
     print("lotto data", lotto_data)
     # Check if participants joined the lotto
     if not lotto_data["participants"]:
-        await ctx.send("No participants joined the lotto!")
-        return 
-    
-    # pick a random winner 
-    lotto_data = get_lotto_data()
+        await ctx.send("No participants joined the lotto! 😔")
+        return
+
+    # Randomly select a winner's ID
     winner_id = random.choice(lotto_data["participants"])
-    winner = ctx.guild.get_member(winner_id) # Get the discord member object 
-        # Announce the winner
+    winner = ctx.guild.get_member(winner_id)  # Fetch the Discord member object
+
+    if winner is None:
+        await ctx.send("The winner could not be found in this server! 😅")
+        return
+
     await ctx.send(f"🎉 Congratulations {winner.mention}! You have won the jackpot of {lotto_data['jackpot']} coins! 🎉")
 
-    # Reset lotto data for the next round
-    lotto_data["participants"] = []
-    lotto_data["jackpot"] = 0
+    # Reset lotto data
+    set_lotto_data("participants", [])
+    set_lotto_data("jackpot", 0)
 
 
 
