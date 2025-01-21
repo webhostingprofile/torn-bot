@@ -46,13 +46,13 @@ async def handle_join_lotto(ctx):
         return
 
     # Check if user is already a participant
-    if ctx.author.id in [participant["id"] for participant in lotto_data["participants"]]:
+    if ctx.author.id in lotto_data["participants"]:  # Check against list of IDs
         await ctx.send(f"{ctx.author.name}, you have already joined the lotto!")
         return
 
-    # Add user to participants
+    # Add user ID to participants
     participants = lotto_data["participants"]
-    participants.append({"id": ctx.author.id, "name": ctx.author.name})
+    participants.append(ctx.author.id)  # Append only the ID
     set_lotto_data("participants", participants)
 
     # Respond to the user
