@@ -457,7 +457,7 @@ async def draw_lotto(ctx):
     # Randomly select a winner's ID
     winner_id = random.choice(lotto_data["participants"])
     #winner = ctx.guild.get_member(winner_id)  # Fetch the Discord member object
-    winner = ctx.guild.fetch_member(winner_id)
+    winner = await ctx.guild.fetch_member(winner_id)
 
     if winner is None:
         await ctx.send(f"test info {winner_id} & {winner}")
