@@ -490,10 +490,27 @@ def run_flask():
 def keep_alive():
     while True:
         try:
-            requests.get("http://localhost:8080")
+            requests.get("https://torn-bot.onrender.com")
+            #requests.get("http://localhost:8080")
         except requests.exceptions.RequestException as e:
             print(f"Keep-alive request failed: {e}")
-        time.sleep(5 * 60)  # Ping every 5 minutes
+        time.sleep(50 * 60)  # Ping every 50 minutes
+
+def start_discord_bot():
+    retries = 5
+    delay = 60  # 1-minute delay between retries
+
+    for attempt in range(retries):
+        try:
+            client.run(TOKEN)
+            break  # Successful run; exit loop
+        except Exception as e:
+            if "429 Too Many Requests" in str(e):
+                print(f"Rate limited. Retry {attempt + 1}/{retries} after {delay} seconds...")
+                time.sleep(delay)
+            else:
+                print(f"Failed to start Discord client: {e}")
+                break
 
 # Run Flask server in a separate thread
 if __name__ == "__main__":
@@ -507,11 +524,8 @@ if __name__ == "__main__":
     keep_alive_thread.daemon = True  # Daemon thread will exit when the main thread exits
     keep_alive_thread.start()
 
-    try:
-        # Start the Discord bot
-        client.run(TOKEN)
-    except Exception as e:
-        print(f"Failed to start Discord client: {e}")
+    # Start the Discord bot with retry logic
+    start_discord_bot()
 
 
 
