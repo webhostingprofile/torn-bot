@@ -512,6 +512,10 @@ def start_discord_bot():
                 print(f"Failed to start Discord client: {e}")
                 break
 
+MAX_RETRIES = 5  # Maximum number of retry attempts
+INITIAL_WAIT = 60  # Initial wait time in seconds
+
+
 # Run Flask server in a separate thread
 if __name__ == "__main__":
     # Start the Flask server in a background thread
@@ -524,8 +528,21 @@ if __name__ == "__main__":
     keep_alive_thread.daemon = True  # Daemon thread will exit when the main thread exits
     keep_alive_thread.start()
 
-    # Start the Discord bot with retry logic
-    start_discord_bot()
+    retries = 0
+    wait_time = INITIAL_WAIT
 
-
+    while retries < MAX_RETRIES:
+        try:
+            print(f"Starting Discord client (Attempt {retries + 1}/{MAX_RETRIES})...")
+            client.run(TOKEN)
+            break  # Exit loop if client.run() succeeds
+        except Exception as e:
+            print(f"Failed to start Discord client: {e}")
+            retries += 1
+            if retries < MAX_RETRIES:
+                print(f"Retrying in {wait_time} seconds...")
+                time.sleep(wait_time)
+                wait_time *= 2  # Double the wait time for exponential backoff
+            else:
+                print("Max retries reached. Exiting.")
 
